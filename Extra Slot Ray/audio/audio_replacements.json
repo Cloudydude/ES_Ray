@@ -1,0 +1,5 @@
+{
+	"glide_up": { "File": "glide1.ogg", "Type": "Sound", "Channel": "F0" },
+	"glide_stationary": { "File": "glide.ogg", "Type": "Sound", "Channel": "BC" },
+	"glide_down": { "File": "glide2.ogg", "Type": "Sound", "Channel": "DB" }
+}

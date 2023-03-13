@@ -1,0 +1,93 @@
+// Flying up, carrying player 1
+//# address-hook(0x014106) end(0x014148)
+function void fn014106()
+{
+	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+		glideDirection = GLIDE_UP
+	base.fn014106()
+}
+
+global bool MGZ2Fix
+
+// Controllable, carrying player 1
+//# address-hook(0x01414c) end(0x0141ee)
+function void fn01414c()
+{
+	base.fn01414c()
+	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	{
+		MGZ2Fix = true
+		if (!tails.carrying)
+		{
+			RayGlide_ChangeDirection_MGZ2Boss()
+		}
+		else if (glideDirection == GLIDE_DOWN)
+		{
+			glideDirection = GLIDE_UP
+		}
+	}
+}
+
+
+// Flying up, alone
+//# address-hook(0x01421c) end(0x014252)
+function void fn01421c()
+{
+	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	{
+		if (control.pad1.state & CONTROL_ABC)
+		{
+			RayGlide_Stop()
+		}
+		else
+		{
+			glideDirection = GLIDE_UP
+			base.fn01421c()
+		}
+	}
+	else
+	{
+		base.fn01421c()
+		return
+	}
+}
+
+
+// Controllable, alone
+//# address-hook(0x014254) end(0x01425a)
+function void fn014254()
+{
+	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	{
+		if (control.pad1.state & CONTROL_ABC)
+		{
+			RayGlide_Stop()
+		}
+		else
+		{
+			base.fn014254()
+			RayGlide_ChangeDirection_MGZ2Boss()
+		}
+	}
+	else
+	{
+		base.fn014254()
+		return
+	}
+}
+
+
+// Change animation by vertical speed
+function void RayGlide_ChangeDirection_MGZ2Boss()
+{
+	if (char.velocity.y >= 0x0180 && glideDirection == GLIDE_UP)
+	{
+		glideDirection = GLIDE_DOWN
+		RayGlide_ChangeAnim(GLIDE_ANIM_TURN)
+	}
+	else if (char.velocity.y < 0x0180 && glideDirection == GLIDE_DOWN)
+	{
+		glideDirection = GLIDE_UP
+		RayGlide_ChangeAnim(GLIDE_ANIM_TURN)
+	}
+}

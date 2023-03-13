@@ -1,0 +1,11 @@
+
+#if EXTRA_CHARACTERS_ACTIVE
+
+#if EXTRA_CHARACTERS_UNLIMITED
+
+// Character scripts
+include charscripts/?
+
+#endif
+
+#endif

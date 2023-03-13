@@ -1,0 +1,1569 @@
+global bool Display_Ray_Banner
+global u8 Ray_Banner_Text
+global bool Ray_Zone_Banner
+global bool Custom_Banner
+global bool Ray_hud_type
+
+function bool ESS_drawchar_Es(s16 px, s16 py, bool no_save, u8 ES_val)
+{
+	if (ES_val == 0x02)
+	{
+		s16 posx = no_save ? px + 0x2f : px + 0x2f
+		if (System.getGlobalVariableValueByName("Mighty_Partner") == 0x01)
+			posx -= 0x03
+		s16 posy = no_save ? py + 0x3f : py + 0x89
+		objA0.animation.timer = ES_val
+		
+		ExtraChar.DataSelect.drawCharacterSprite(posx, posy, 0x9fff)
+		return true
+	}
+	
+	return base.ESS_drawchar_Es(px, py, no_save, ES_val)
+}
+
+function s32 ESS_saveboxgetcolor_Es(u8 ES_val)
+{
+	if (ES_val == 0x02)
+		return 0xfc486c
+	
+	return base.ESS_saveboxgetcolor_Es(ES_val)
+}
+
+function string ExtraChar.Menu.actselect.items.menuitems.getNames(u8 character)
+{
+	if (character == 0x00 && (Ray_Partner == 0x01 || Ray_Partner == 0x04))
+		return "Sonic & Ray"
+	else if (character == 0x04 && (Ray_Partner == 0x02 || Ray_Partner == 0x04))
+		return "Knuckles & Ray"
+	
+	return base.ExtraChar.Menu.actselect.items.menuitems.getNames(character)
+}
+
+// Helper function. Renders the character selected in og. act select.
+function void ExtraChar.Menu.actselect.items.characterlist.drawleader(s16 px, s16 py, u16 renderQueue)
+{
+	u16 atex = getatex(0x02)
+	string key = Ray_menu_sprites()
+	
+	// Sonic & Tails
+	if (actselect.character.backup == CHARS_SONIC_AND_TAILS)
+	{
+		px -= 0x0b
+		Standalone.drawCharacterSpriteDirect(CHARACTER_SONIC, px, py, 0xb1, 0x00 | SPRITE_FLAG_FLIP_X, 0x40, renderQueue)
+		px += 0x0e
+		py += 0x02
+		
+		if (Ray_Partner == 0x01 || Ray_Partner == 0x04)
+			Renderer.drawCustomSprite(key, px + ((Ray_Sprite_type == 0x00) ? 0x09: 0x07), py + 0x12, atex, 0x00 | SPRITE_FLAG_FLIP_X, renderQueue)
+		else
+			Standalone.drawCharacterSpriteDirect(CHARACTER_TAILS, px, py, 0xa6, 0x00 | SPRITE_FLAG_FLIP_X, 0x60, renderQueue)
+	}
+	
+	// Knuckles & Tails
+	else if (actselect.character.backup == CHARS_KNUCKLES_AND_TAILS)
+	{
+		px -= 0x07
+		Standalone.drawCharacterSpriteDirect(CHARACTER_KNUCKLES, px, py, 0xd9, 0x00 | SPRITE_FLAG_FLIP_X, 0x80, renderQueue)
+		px += 0x0b
+		py += 0x02
+		
+		if (Ray_Partner == 0x02 || Ray_Partner == 0x04)
+			Renderer.drawCustomSprite(key, px + ((Ray_Sprite_type == 0x00) ? 0x09: 0x07), py + 0x12, atex, 0x00 | SPRITE_FLAG_FLIP_X, renderQueue)
+		else
+			Standalone.drawCharacterSpriteDirect(CHARACTER_TAILS, px, py, 0xa6, 0x00 | SPRITE_FLAG_FLIP_X, 0x60, renderQueue)
+	}
+	
+	else
+	{
+		base.ExtraChar.Menu.actselect.items.characterlist.drawleader(px, py, renderQueue)
+	}
+}
+
+function void ExtraChar.DataSelect.drawCharacterSprite(s16 px, s16 py, u16 renderQueue)
+{
+	u8 atex
+	string key
+
+#if EXTRA_SAVE_SLOTS_ACTIVE
+	if (Mods.isModActive("Extra Slot Mighty") && System.getGlobalVariableValueByName("Mighty_Partner") == 1 && (objA0.animation.timer == 1 || u8[A3 + 0x24] == 0x01))
+#else
+	if (Mods.isModActive("Extra Slot Mighty") && System.getGlobalVariableValueByName("Mighty_Partner") == 1 && objA0.animation.timer == 1)
+#endif
+	{
+		atex = getatex(0x02)
+		key = Ray_menu_sprites()
+		Renderer.drawCustomSprite(key, px + 0x09, py, atex, SPRITE_FLAG_PRIO | SPRITE_FLAG_FLIP_X, renderQueue)
+		return
+	}
+
+#if EXTRA_SAVE_SLOTS_ACTIVE
+	if (objA0.animation.timer == 0x02 || u8[A3 + 0x24] == 0x02)
+#else
+	if (objA0.animation.timer == 0x02)
+#endif
+	{
+		atex = getatex(0x02)
+		key = Ray_menu_sprites()
+
+		if (Renderer.hasCustomSprite(key))
+			Renderer.drawCustomSprite(key, px, py, atex, 0, renderQueue)
+		return
+	}
+	
+	// Call the base function
+	base.ExtraChar.DataSelect.drawCharacterSprite(px, py, renderQueue)
+}
+
+function void ExtraChar.DataSelect.drawCharacterIconsSprite(s16 px, s16 py, u16 renderQueue)
+{
+	if (objA0.animation.timer == 0x02)
+	{
+		u8 atex = getatex(0x02)
+		string key
+		if (Mods.isModActive("Data Select Character Sprites - MAIN"))
+		{
+			if (System.getGlobalVariableValueByName("MenuStyle.dataSelect") != 0)
+			{
+				if (System.getGlobalVariableValueByName("MenuStyle.noContinues") == 1)
+				{
+					key = (Mods.isModActive("Mania Style Data Select")) ? "dataSel_life_Ray" : (Ray_Sprite_type == 0) ? "dataSel_life_slot2_Mania" : "dataSel_life_slot2"
+				}
+				else
+				{
+					key = Ray_LivesandContinues()
+				}
+				if (Renderer.hasCustomSprite(key))
+				{
+					if (u8[A0 + 0x05] == 0x02 && u8[A0 + 0x08] != 0x01)
+					{
+						Renderer.drawCustomSprite(key, px-16, py + ((System.getGlobalVariableValueByName("MenuStyle.noContinues") == 1) ? 24 : 8), atex, SPRITE_FLAG_PRIO, renderQueue)
+					}
+				}
+			}
+		}
+		else
+		{
+			key = Ray_LivesandContinues()
+			if (Renderer.hasCustomSprite(key))
+			{
+				if (u8[A0 + 0x05] == 0x02 && u8[A0 + 0x08] != 0x01)
+				{
+					Renderer.drawCustomSprite(key, px-16, py + 8, atex, SPRITE_FLAG_PRIO, renderQueue)
+				}
+			}
+		}
+		
+		key = Ray_LivesandContinues()
+		if (Renderer.hasCustomSprite(key))
+		{
+			if (u8[A0 + 0x05] == 0x02 && u8[A0 + 0x08] != 0x01)
+			{
+				Renderer.drawCustomSprite(key, px-16, py + 8, atex, SPRITE_FLAG_PRIO, renderQueue)
+			}
+		}
+		return
+	}
+	
+	// Call the base function
+	base.ExtraChar.DataSelect.drawCharacterIconsSprite(px, py, renderQueue)
+}
+
+function void ExtraChar.Competition.drawCharacterSprite(s16 px, s16 py, u16 renderQueue)
+{
+	if (objA0.animation.timer == 0x02)
+	{
+		u8 atex = getatex(0x02)
+		string key = Mods.isModActive("Mania Style Data Select") ? "dataSel_character_ray" : getRaySprite()
+		Renderer.drawCustomSprite(key, px, py, atex, SPRITE_FLAG_PRIO, renderQueue)
+		return
+	}
+	
+	// Call the base function
+	base.ExtraChar.Competition.drawCharacterSprite(px, py, renderQueue)
+}
+
+function void ExtraChar.Competition.drawCharacterContinueSprite(s16 px, s16 py, u16 renderQueue)
+{
+	if (objA0.animation.timer == 0x02)
+	{
+		u8 atex = getatex(0x02)
+		string key = (Ray_Sprite_type == 0) ? "continue_icon_Ray_Mania_0x00" : "continue_icon_Ray_S3_0x00"
+		Renderer.drawCustomSprite(key, px, py, atex, 0x00, renderQueue)
+		return
+	}
+	
+	// Call the base function
+	base.ExtraChar.Competition.drawCharacterContinueSprite(px, py, renderQueue)
+}
+
+function void ExtraChar.Challenges.drawCharacterContinueSprite(u8 xtrachar, s16 px, s16 py, u8 flags, u16 renderQueue)
+{
+	if (xtrachar == 0x02)
+	{
+		string key = "ESS_Cont_Es2"
+		Renderer.drawCustomSprite(key, px, py, 0x00, flags, renderQueue)
+		return
+	}
+	
+	// Call the base function
+	base.ExtraChar.Challenges.drawCharacterContinueSprite(xtrachar, px, py, flags, renderQueue)
+}
+
+function void ExtraChar.loadSpecialPalettes(u8 xtrachar, u8 character, u32 targetAddress, u8 paletteVariant)
+{
+	u8 gameMode = global.game_mode & 0x7f
+	bool rays =  ((character != CHARACTER_TAILS) && (gameMode == 0x4c || gameMode == 0x44 || gameMode == 0x50 || gameMode == 0x1c || gameMode == 0x3c || gameMode == 0xc0 || gameMode == 0x40 || gameMode == 0x38 || gameMode == 0x2c || gameMode == 0x30 || global.game_mode == 0x9c))
+	if ((xtrachar == 2 && (gameMode == 0x4c || (global.game_mode == 0x0c && !global.level_started && global.zone_act != 0x0d01))) || (xtrachar == 2 && character == CHARACTER_TAILS && gameMode != 0x4c && gameMode != 0x44 && gameMode != 0x2c && gameMode != 0x30) || character == 4 || gameMode != 0x4c && (global.characters != CHARS_TAILS_ALONE && character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && xtrachar == 0 && levelselect.characters != 2) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) && levelselect.characters != 2 || (Ray_Partner == 3 && xtrachar == 1 && levelselect.characters != 2) || (Ray_Partner == 4 && levelselect.characters != 2)) ) ) || (targetAddress == 0x802280 && (rays || char.mapping_offset == 0x148eb8)) || competition_mode.active && (competition_mode.xtrachar.player1 == 0x02 || competition_mode.xtrachar.player2 == 0x02))
+    {
+		if (global.game_mode == 0x9c)
+			targetAddress = 0x802280
+
+		if (!Ray_shoe_color)
+		{
+			if (Ray_Pal == 6) // Guava red Ray_shoe_color
+			{
+				u16[targetAddress + 2 * 8] = (paletteVariant != 0) ? 0x060c : 0x034d
+				u16[targetAddress + 2 * 9] = (paletteVariant != 0) ? 0x0406 : 0x0526
+				u16[targetAddress + 2 * 19] = (paletteVariant != 0) ? 0x0302 : 0x0402 // Mania third red shoe color
+			}
+			else
+			{
+				u16[targetAddress + 2 * 8] = (paletteVariant != 0) ? 0x060C : 0x000e
+				u16[targetAddress + 2 * 9] = (paletteVariant != 0) ? 0x0406 : 0x0008
+				u16[targetAddress + 2 * 19] = (Ray_Pal == 9) ? 0x0212 : ((paletteVariant != 0) ? 0x0403 : 0x0004) // Mania third red shoe color
+			}
+		}
+
+		if (Rays_Grays == 1 && (Ray_Pal == 1 || Ray_Pal == 2 || Ray_Pal == 6 || Ray_Pal == 9))
+		{
+			u16[targetAddress + 2 * 12] = (paletteVariant != 0) ? 0x0eac : 0x0ecc
+			u16[targetAddress + 2 * 13] = (paletteVariant != 0) ? 0x0c8a : 0x0caa
+			u16[targetAddress + 2 * 14] = (paletteVariant != 0) ? 0x0846 : 0x0866
+		}
+
+		if (Ray_Pal == 3 && Ray_Sprite_type == 0)
+		{
+			u16[targetAddress + 2 * 11] = (paletteVariant != 0) ? 0x0314 : 0x0026
+		}
+		
+		return
+	}
+	
+	base.ExtraChar.loadSpecialPalettes(xtrachar, character, targetAddress, paletteVariant)
+}
+
+// This loads his palette for the red Ray_shoe_color during the best ending, but it's not the best way of going about it.
+function void yieldExecution()
+{
+	if (global.zone_act == 0x0d01 || global.game_mode == 0xc0)
+	{
+		if (Ray_shoe_color == 0)
+		{
+			if (Ray_Pal == 6) // Guava red Ray_shoe_color
+			{
+				u16[0x802280 + 2 * 8] = 0x034d
+				u16[0x802280 + 2 * 9] = 0x0526
+				u16[0x802280 + 2 * 19] = 0x0402 // Mania third red shoe color
+			}
+			else
+			{
+				u16[0x802280 + 2 * 8] = 0x000e
+				u16[0x802280 + 2 * 9] = 0x0008
+				u16[0x802280 + 2 * 19] = (Ray_Pal == 9) ? 0x0212 : 0x0004 // Mania third red shoe color
+			}
+		}
+
+		if (Rays_Grays == 1 && (Ray_Pal == 1 || Ray_Pal == 2 || Ray_Pal == 6 || Ray_Pal == 9))
+		{
+			u16[0x802280 + 2 * 12] = 0x0ecc
+			u16[0x802280 + 2 * 13] = 0x0caa
+			u16[0x802280 + 2 * 14] = 0x0866
+		}
+
+		if (Ray_Pal == 3 && Ray_Sprite_type == 0)
+		{
+			u16[0x802280 + 2 * 11] = 0x0026
+		}
+	}
+	base.yieldExecution()
+}
+
+global u16 Randy
+//# address-hook(0x05f26c) end(0x05f2dc)
+function void fn05f26c()
+{
+	base.fn05f26c()
+	if (Move_Ray)
+		Randy = System.rand() % 50 // 2% chance of happening
+}
+
+function void Ray_Coords()
+{
+    objA0.position.x.u16 = (Move_Ray) ? 333 : 410
+    objA0.position.y.u16 = 304
+}
+
+//Continue screen for Ray while he waits for Knuckles to run by
+//# address-hook(0x05c7b2) end(0x05c7e0)
+function void fn05c7b2()
+{
+	base.fn05c7b2()
+	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) )))
+		u16[A0 + 0x22] = 0xba00
+}
+
+global bool DONT
+//# address-hook(0x08555e) end(0x08558e)
+function void fn08555e()
+{
+    base.fn08555e()
+
+	if ((global.framecounter % 0x02) == 0x00 && XtraChar == 0x02)
+	{
+		if (objA0.update_address != 0x01abb6)
+		{
+			DONT = true
+		}
+	}
+}
+
+global bool Move_Ray
+
+function void ExtraChar.Character.onEndingLogo.fade()
+{
+	if (XtraChar == 0x02)
+		Move_Ray = true
+	base.ExtraChar.Character.onEndingLogo.fade()
+}
+
+//# address-hook(0x05f2ea) end(0x05f2f2)
+function void fn05f2ea()
+{
+	DONT = false // need this for the hyper ending
+	base.fn05f2ea()
+}
+
+//# address-hook(0x05f5de) end(0x05f64e)
+function void fn05f5de()
+{
+	DONT = false // need this for the super ending
+	base.fn05f5de()
+}
+
+function string getRaySprite()
+{
+	return (Ray_Sprite_type == 0) ? "dataSel_slot2_Mania" : "dataSel_slot2"
+}
+
+function void Ray_Dust(s16 px, s16 py, u8 flags, u16 renderQueue)
+{
+	u64 key = stringformat("Ray_cloud_%d", objA0.value26)
+	Renderer.drawCustomSprite(key, px, py, 0, (flip_dust) ? flags : (flags | SPRITE_FLAG_FLIP_X), renderQueue)
+}
+
+function u64 Ray_menu_sprites()
+{
+	if (Mods.isModActive("Mania Style Data Select"))
+		return "dataSel_character_ray_M"
+	else
+		return getRaySprite()
+}
+
+global bool End_Pilot
+function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
+{
+	u8 gameMode = global.game_mode & 0x7f
+	bool prioFlag = (objA0.sprite_attributes & 0x8000) != 0
+	u64 key
+	u64 paletteKey
+	u8 atex
+	u8 flags = ((objA0.render_flags & 0x01) ? SPRITE_FLAG_FLIP_X : 0) | ((objA0.render_flags & 0x02) ? SPRITE_FLAG_FLIP_Y : 0) | ((objA0.sprite_attributes & 0x8000) ? SPRITE_FLAG_PRIO : 0)
+	bool Mania_Title_Cards = (Mods.isModActive("Sonic mania Title Cards4.5") || Mods.isModActive("Sonic mania Title Cards Encore4.5") || Mods.isModActive("Sonic Mania Title Cards 5.0") || Mods.isModActive("Sonic Mania Title Cards 5.0 encore") || Mods.isModActive("Sonic Mania Title Cards FULL") || Mods.isModActive("Sonic Mania Title Cards FULLSonic Mania Title Cards FULL ENCORE"))
+
+	// Secret Screen
+	if (Randy == 1 && (objA0.update_address == 0x05f2ea || objA0.update_address == 0x05f46a))
+	{
+		Standalone.playAudio(0x28)
+		key = "ay"
+		Renderer.drawCustomSprite(key, getScreenExtend() + 70, 0, 0, 0x40, 0xffff)
+		return true
+	}
+	
+	if ((global.characters != CHARS_TAILS_ALONE) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ))// || objA0.update_address == 0x00927a) Just player one, thanks!
+	{
+		if ((objA0.update_address == 0x067472 || (isSonicIntro() && objA0.update_address == 0x01abb6 && objA0.base_state == 0x1A)))
+		{	// Fix for Sonic in the intro, if the player is using custom Sonic sprites
+			u8 animationSprite = objA0.animation.sprite
+			atex = 0x40 + getMainCharacter() * 0x20
+			key = (char.mapping_offset == 0x146816) ? stringformat("character_supersonic_0x%02x", animationSprite) : stringformat("character_sonic_0x%02x", animationSprite)
+			if (!Renderer.hasCustomSprite(key))
+			{
+				u32 sourceBase    = ((animationSprite >= 0xda) ? 0x140060 : 0x100000)
+				u32 tableAddress  = (super.active ? 0x148378 : 0x148182)
+				u32 mappingOffset = (super.active ? 0x146816 : 0x146620)
+
+				key = Renderer.setupCustomCharacterSprite(sourceBase, tableAddress, mappingOffset, animationSprite, 0x00)
+				Renderer.drawCustomSprite(key, px, py, atex, flags, renderQueue)
+			}
+			else
+				Renderer.drawCustomSprite(stringformat(key, animationSprite), px, py, atex, flags, renderQueue)
+			return true
+		}
+		if (objA0.update_address == 0x2004AA) || (objA0.update_address == 0x2004AC)
+		{
+			Ray_Dust(px, py, flags, renderQueue)
+			return true
+		}
+		// Intro plane
+		else if (objA0.update_address == 0x0677ce || objA0.update_address == 0x067800)
+		{
+			if (XtraChar == 1 && System.getGlobalVariableValueByName("Mighty_Pilot") != 2)
+				return base.Standalone.onWriteToSpriteTable(px, py, renderQueue)
+			key = (Ray_Sprite_type) ? "S3_ray_in_tornado" : "Mania_ray_in_tornado"
+			Renderer.drawCustomSprite(key, px, py - 16, 0, flags, renderQueue + 2)
+			Renderer.addSpriteMask(px - 11, py - 28, 23, 20, renderQueue + 1, 8000)
+			return false
+		}
+		else if (objA0.update_address == 0x05ebb4)
+		{
+			key = (Ray_Sprite_type) ? "S3_ray_in_tornado" : "Mania_ray_in_tornado"
+			Renderer.drawCustomSprite(key, px, py, 0, flags, renderQueue)
+			return true
+		}
+		else if (objA0.update_address == 0x05ed18) //standing character
+		{
+			if (objA0.subtype2c == 0) //standing character
+			{
+				key = (Ray_Sprite_type) ? "Small_S3_Ray" : "Small_Mania_Ray"
+				Renderer.drawCustomSprite(key, px, py, 0, flags, renderQueue, 0, 255)		
+				return true
+			}
+			return base.Standalone.onWriteToSpriteTable(px, py, renderQueue)
+		}
+		else if (objA0.update_address == 0x00927a)
+		{
+			u8 character = getSecondCharacter()
+			paletteKey = stringformat("slot2palette_bluesphere_0%d", Ray_Pal)
+			//paletteKey = (MightyPalette == 0) ? "slot1palette_bluesphere_ultimate" : (MightyPalette == 1) ? "slot1palette_bluesphere_segasonic" : (MightyPalette == 2) ? "slot1palette_bluesphere_chaotix" : (MightyPalette == 3) ? "slot1palette_bluesphere_mania" : "slot1palette_bluesphere_Knuxred"
+			key = (Ray_Sprite_type == 0) ? stringformat("bluesphere_slot2_Mania_0x%02x", objA0.animation.sprite) : stringformat("bluesphere_slot2_0x%02x", objA0.animation.sprite)
+			if (Renderer.hasCustomSprite(key))
+			{
+				// Check if there's also a custom palette
+				if (System.hasExternalPaletteData(paletteKey, 0))
+				{
+					atex = 0x40 + character * 0x20
+				}
+			}
+			else //let's say someone deleted the bluespheres sprites...at least they'll see sonic...
+			{
+				//I don't care it's internal sprite rendering! Pick the external palette ANYWAY!
+
+				if (System.hasExternalPaletteData(paletteKey, 0))
+				{
+					atex = 0x40 + character * 0x20
+				}
+				key = Renderer.setupCustomCharacterSprite(0x28f95a, 0x2908d2, objA0.mapping_offset, objA0.animation.sprite, atex)
+			}
+			Renderer.drawCustomSprite(key, px, py, atex, flags, renderQueue)
+			// 0x000e -> fc0000
+			// 0x0008 -> 900000
+			// u16[0x802000 + 0x40 + 2 * 12] = 0x000e
+			// u16[0x802000 + 0x40 + 2 * 13] = 0x0008
+			// u16[0x802000 + 0x40 + 2 * 14] = 0x064e
+			return true
+		}
+		else if (objA0.update_address == 0x009488)
+		{
+			atex = 0x10
+			key = (Ray_Sprite_type == 0) ? stringformat("Ray_Tail_Mania_%d", objA0.animation.sprite) : stringformat("Ray_Tail_%d", objA0.animation.sprite)
+			if (Renderer.hasCustomSprite(key))
+			{
+				// Check if there's also a custom palette
+				paletteKey = stringformat("slot2palette_bluesphere_0%d", Ray_Pal)
+				if (System.hasExternalPaletteData(paletteKey, 0))
+				{
+					u16 tempValue = ((getMainCharacter() == CHARACTER_TAILS) ? getMainCharacter() : getSecondCharacter())
+					atex = 0x40 + tempValue * 0x20
+				}
+			}
+			else
+			{
+				key = Renderer.setupCustomCharacterSprite(0x2909e8, 0x291106, objA0.mapping_offset, objA0.animation.sprite, 0x10)
+			}
+			Renderer.drawCustomSprite(key, px, py, atex, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue) // disable for now
+			return true
+		}
+		else if (gameMode == 0x34 || gameMode == 0x48 || gameMode == 0x2c || gameMode == 0x30 || global.game_mode == 0x85 || global.game_mode == 0x87) //just check for Ray, thanks!)
+		{
+			if (objA0.update_address == 0x04dffe)
+			{
+				atex = getatex(0x02)
+				u8 animation = ((global.framecounter >> 3) % (4) + 0xb1)
+				key = (Ray_Sprite_type == 0) ? stringformat("Mania_Ray_0x%02x", animation) : stringformat("character_slot2_0x%02x", animation)
+				if (animation == 0xb4)
+				{
+					key = (Ray_Sprite_type == 0) ? "Mania_Ray_0xb2" : "character_slot2_0xb2"
+				}
+				Renderer.drawCustomSprite(key, px, py - 4, atex, flags, renderQueue)
+				return true
+			}
+		}
+		else if (global.game_mode == 0x14)
+		{
+			atex = 0x40 + getSecondCharacter() * 0x20
+			if (objA0.update_address == 0x05c74a) // continue animation
+			{
+				if (Ray_Sprite_type == 0)
+					key = stringformat("Mania_continue_0x%02x", objA0.animation.sprite)
+				else
+					key = stringformat("S3_continue_0x%02x", objA0.animation.sprite)
+				Renderer.drawCustomSprite(key, px, py, atex, flags, renderQueue)
+				return true
+			}
+			else if (objA0.update_address == 0x0160d2) // Tail
+			{
+				key = stringformat((Ray_Sprite_type == 0) ? "character_Mania_tails_0x%02x" : "character_slot2_tails_0x%02x", objA0.animation.sprite)
+				Renderer.drawCustomSprite(key, px, py - 4, atex, flags, renderQueue)
+				return true
+			}
+			// Ray waiting and running
+			else if (objA0.update_address == 0x05c790)
+			{
+				u64 name = (Ray_Sprite_type == 0) ? "Mania_Ray" : "character_slot2"
+
+				if (objA0.animation.sprite >= 0xbf && objA0.animation.sprite <= 0xc0)
+				{
+					u8 anim = objA0.animation.sprite = ((global.framecounter >> 2) % (4) + 0x21)
+					key = stringformat("%s_0x%02x", name, anim)
+				}
+				else
+					key = stringformat("%s_0x%02x", name, objA0.animation.sprite)
+				
+				Renderer.drawCustomSprite(key, px, py - 4, atex, flags, renderQueue)
+				return true
+			}
+		}
+	}
+
+	// Best ending screen
+	if (objA0.update_address == 0x1ffbe0 || objA0.update_address == 0x1ffbd0)
+	{
+		if (objA0.value3a == 0x02)
+		{
+			u8 character = 4
+			atex = 0x40 + character * 0x20
+			
+			u8 animation = ((level.framecounter >> 3) % (4) + 0xb1)
+			key = (Ray_Sprite_type == 0) ? (stringformat("Mania_Ray_0x%02x", animation)) : (stringformat("character_slot2_0x%02x", animation)) 
+			if (animation == 0xb4)
+			{
+				key = (Ray_Sprite_type == 0) ? "Mania_Ray_0xb2" : "character_slot2_0xb2"
+			}
+			
+			Renderer.drawCustomSprite(key, px, py, atex, flags, objA0.value42)
+			return true
+		}
+	}
+
+	if (u8[A0 + 0x38] == 0xff && objA0.animation.sprite == 5 && objA0.animation.timer == 2 && u16[0xffffb04a + 0x30] == 0)
+	{
+		u64 portrait = 0
+		if (u8[A0 + 0x23] == 0x18)
+			portrait = "dataSel_savePortrait_slot2"
+		else if (u8[A0 + 0x23] == 0x19)
+			portrait = "dataSel_savePortrait_superslot2"
+		else if (u8[A0 + 0x23] == 0x1b)
+			portrait = "Clear_slot2"
+		if (Renderer.hasCustomSprite(portrait))
+		{
+		#if GAMEAPP >= 0x22051500
+			Renderer.drawCustomSprite(portrait, px, py - ((Mods.isModActive("Data Select Character Sprites - MAIN") && System.getGlobalVariableValueByName("MenuStyle.dataSelect") == 0) ? 8 : 0), 0, SPRITE_FLAG_PRIO, renderQueue)
+		#endif
+		#if GAMEAPP <= 0x22050800
+			Renderer.drawCustomSprite(portrait, px, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+		#endif
+			u8[A0 + 0x23] = 0
+		}
+	}
+    
+	if (objA0.mapping_offset == 0x00ce0e || objA0.mapping_offset == 0x20bd68)
+	{
+		ExtraChar.loadCharacterPalette(0x02, 0x802080 + u32(0x01 * 0x80), 0x00)
+		u16 characters = u16[A0 + 0x34]
+
+		if (objA0.update_address == 0x00d30c)
+			characters = u16[0xffffef4c]
+		else if (objA0.update_address != 0x00d42c)
+			characters = 0xff
+
+		if (objA0.animation.timer == 0)
+		{
+			if (characters == CHARS_SONIC_AND_TAILS && (Ray_Partner == 1 || Ray_Partner == 4))
+			{
+				// Needed for newer version
+			#if GAMEAPP >= 0x22082700
+				renderQueue = 0 // toggle this when the menu sprites mod is active
+			#endif
+				if (Renderer.hasCustomSprite("dataSel_character_sonic"))
+					Renderer.drawCustomSprite("dataSel_character_sonic", px-6, py, 0x40, SPRITE_FLAG_PRIO, 0xffff)
+				else if (Renderer.hasCustomSprite("charselect_sonic"))
+					Renderer.drawCustomSprite("charselect_sonic", px-9, py-20, 0x40, SPRITE_FLAG_PRIO | SPRITE_FLAG_FLIP_X, 0xffff)
+				else
+					Standalone.drawCharacterSpriteDirect(CHARACTER_SONIC, px-9, py-20, 0xb1, SPRITE_FLAG_PRIO | SPRITE_FLAG_FLIP_X, 0x40, 0xffff)
+				objA0.animation.sprite = 0
+				atex = getatex(0x02)
+				key = Ray_menu_sprites()
+				if (Renderer.hasCustomSprite(key))
+					Renderer.drawCustomSprite(key, px + 0x09, py, atex, SPRITE_FLAG_PRIO | SPRITE_FLAG_FLIP_X, 0xfffe)
+				if (!Mods.isModActive("Mania Style Data Select") && !Renderer.hasCustomSprite("dataSel_lifeContinue_sonic"))
+					return false
+			}
+			else if (characters == 4 && (Ray_Partner == 2 || Ray_Partner == 4))
+			{
+			#if GAMEAPP >= 0x22082700
+				renderQueue = 0 // toggle this when the menu sprites mod is active
+			#endif
+				if (Renderer.hasCustomSprite("dataSel_character_knuckles"))
+					Renderer.drawCustomSprite("dataSel_character_knuckles", px-7, py, 0x80, SPRITE_FLAG_PRIO | SPRITE_FLAG_FLIP_X, 0xffff)
+				else if (Renderer.hasCustomSprite("charselect_knuckles"))
+					Renderer.drawCustomSprite("charselect_knuckles", px-7, py-20, 0x80, SPRITE_FLAG_PRIO | SPRITE_FLAG_FLIP_X, 0xffff)
+				else
+					Standalone.drawCharacterSpriteDirect(CHARACTER_KNUCKLES, px-7, py-20, 0xd9, SPRITE_FLAG_PRIO | SPRITE_FLAG_FLIP_X, 0x80, 0xffff)
+				objA0.animation.sprite = 0
+				atex = getatex(0x02)
+				key = Ray_menu_sprites()
+				Renderer.drawCustomSprite(key, px + 0x09, py, atex, SPRITE_FLAG_PRIO | SPRITE_FLAG_FLIP_X, 0xfffe)
+				if (!Mods.isModActive("Mania Style Data Select") && !Renderer.hasCustomSprite("dataSel_lifeContinue_knuckles"))
+					return false
+			}
+		}
+	}
+	
+	// Fix for Tails' Tails when you step on the super emeralds in HPZ
+	// it also prevents Ray's tail doesn't turn into Tails' Tails.
+	if (!competition_mode.active)
+	{
+		u8 drawCharacterVariant = 0xff
+		if (A0 == 0xffffb000)
+		{
+			// Player 1
+			drawCharacterVariant = 0
+		}
+		else if (A0 == 0xffffb04a)
+		{
+			// Player 2
+			drawCharacterVariant = 1
+		}
+		else if (A0 == 0xffffcc0a && u16[0xffffcc3a] != 0)
+		{
+			// Tails' tails
+			drawCharacterVariant = 2
+		}
+
+		// And now for the edge cases...
+		if (gameMode != 0x0c && gameMode != 0x08)
+		{
+			// Check if fading out to special stage, which is only relevant when entering a super emerald stage from the HPZ emerald cave
+			if (gameMode != 0x34 || (objA0.update_address != 0x0160d2 && objA0.update_address != 0x010a94 && objA0.update_address != 0x01365c && objA0.update_address != 0x016444))
+				drawCharacterVariant = 0xff
+		}
+		if ((debug_mode.state & 0xff) == 1)		// Not when in object placement mode
+		{
+			drawCharacterVariant = 0xff
+		}
+		else if ((char.render_flags & render_flag.WORLD) == 0 && global.zone_act != 0x0d01)		// Additional check disables this when fading out Data Select, but not in outro
+		{
+			drawCharacterVariant = 0xff
+		}
+
+		if (drawCharacterVariant != 0xff)
+		{
+			return Standalone.drawCharacterSprite(char.character, drawCharacterVariant, px, py, false)
+		}
+	}
+	
+	if (XtraChar == 2)
+	{
+		if (objA0.update_address == 0x0837b2) //SIGNPOST
+		{
+			if (objA0.animation.sprite == 0x01 && Ray_Sprite_type == 0) //Ray
+			{
+				atex = 0x40 + 0x20 * getMainCharacter()
+				Renderer.drawCustomSprite("signpost_slot2_Mania_0x01", px, py, atex, flags , renderQueue)
+				return true
+			}       
+		}
+		
+		if (objA0.update_address == 0x02dd98 && (objA0.animation.sprite == 0x14 || objA0.animation.sprite == 0x15))	// "Ray" results text
+		{
+			Renderer.drawCustomSprite( (Mania_Title_Cards) ? "Result_NamePlate_Ray" : ((Ray_hud_type == 1) ? "Ray_Mania_Plate" : "ray_results_text"), px + ((Mania_Title_Cards) ? 0x30 : ((Ray_hud_type == 1) ? 0x0b : 0x20)), py + ((Ray_hud_type == 1 && !Mania_Title_Cards) ? 0 : 0x8), 0, 0x40, (Mania_Title_Cards) ? renderQueue - 50 : renderQueue)
+			return true
+		}
+							// Blue Spheres results texts								// Faliure
+		if (objA0.update_address == 0x02ea50 || objA0.update_address == 0x02ec1e || objA0.update_address == 0x02eac8)
+		{
+			// Load Ray's palette so that the icons and text aren't blank
+			atex = 0x40 + CHARACTER_TAILS * 0x20
+			u32 offset = CHARACTER_TAILS * 0x40
+			u32 dest   = 0x802000 + offset
+			zeroMemory(dest, 0x40)
+			u16 numColors = System.loadExternalPaletteData(getCharacterPaletteKey(CHARACTER_TAILS), 0, 0x800000, 0x20)
+			for (u16 i = 0; i < numColors; ++i)
+			{
+				u32 rgba = u32[0x800000 + i * 4]
+				u16[dest + i * 2] = (rgba & 0xff000000) ? packColorExt(rgba) : 0
+			}
+			if (Ray_shoe_color == 0)
+			{
+				if (Ray_Pal == 6)
+				{
+					u16[dest + 2 * 8] = 0x034d
+					u16[dest + 2 * 9] = 0x0526
+					u16[dest + 2 * 19] = 0x0402 // Mania third red shoe color
+				}
+				else
+				{
+					u16[dest + 2 * 8] = 0x000e
+					u16[dest + 2 * 9] = 0x0008
+					u16[dest + 2 * 19] = (Ray_Pal == 9) ? 0x0212 : 0x0004 // Mania third red shoe color
+				}
+			}
+			if (Rays_Grays == 1 && (Ray_Pal == 1 || Ray_Pal == 2 || Ray_Pal == 6 || Ray_Pal == 9))
+			{
+				u16[dest + 2 * 12] = 0x0ecc
+				u16[dest + 2 * 13] = 0x0caa
+				u16[dest + 2 * 14] = 0x0866
+			}
+			if (Ray_Pal == 3 && Ray_Sprite_type == 0)
+				u16[dest + 2 * 11] = 0x0026
+		}
+
+		if (gameMode == 0x48 || gameMode == 0x0c)	// Blue Spheres results + fade to main game afterwards
+		{
+			// Blue Spheres results texts
+			if (objA0.update_address == 0x02ea50 || objA0.update_address == 0x02ec1e)
+			{
+				bool isSKStage = (global.lock_on_state == 0 && global.sk_bluespheres)
+				
+				if (objA0.animation.sprite == 0x14 || objA0.animation.sprite == 0x15)	// Ray
+				{
+					bool adjustforS3stages = (!isSKStage && global.chaos_emeralds != 7)
+					bool adjustforSKstages = (isSKStage && global.super_emeralds != 7)
+
+					if (Mania_Title_Cards)
+						Renderer.drawCustomSprite("Result_NamePlate_Ray", px + 0x20, py + 0x8, 0, SPRITE_FLAG_PRIO, renderQueue - 50)
+					else if (Ray_hud_type == 1)
+					{
+						if (A0 == 0xffffbde0 || A0 == 0xffffc2ca) // Now Ray can
+							Renderer.drawCustomSprite("Ray_Mania_Plate", px + 0x0b, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+						else if (A0 == 0xffffbf08 || A0 == 0xffffc3f2) // be super/hyper
+							Renderer.drawCustomSprite("Ray_Mania_Plate", px + 0x14, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+						else if (A0 == 0xffffbd96) // Ray 
+							Renderer.drawCustomSprite("Ray_Mania_Plate", px + 0x07, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+					}
+					else
+					{
+						u8 X_adjust = (adjustforS3stages || adjustforSKstages) ? 0x1e : 0x20
+						key = "ray_results_text"
+						if (A0 == 0xffffbde0 || A0 == 0xffffc2ca) // Now Ray can
+							Renderer.drawCustomSprite(key, px + 0x20, py + 0x8, 0, SPRITE_FLAG_PRIO, renderQueue)
+						else if (A0 == 0xffffbf08 || A0 == 0xffffc3f2) // be super/hyper
+							Renderer.drawCustomSprite(key, px + 0x29, py + 0x8, 0, SPRITE_FLAG_PRIO, renderQueue)
+						else if (A0 == 0xffffbd96) // Ray 
+							Renderer.drawCustomSprite(key, px + X_adjust, py + 0x8, 0, SPRITE_FLAG_PRIO, renderQueue)
+					}
+					return true
+				}
+
+				if (objA0.animation.sprite == 0x12)
+				{
+					if (global.super_emeralds == 7) // HYPER
+					{
+						Renderer.drawCustomSprite((Mania_Title_Cards) ? "Result_NamePlate_HyperT" : ((Ray_hud_type == 1) ? "Hyper_Mania_Plate" : "Ray_Hyper_text"), px + 0x09, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+						return true
+					}
+					else // SUPER
+					{
+						Renderer.drawCustomSprite((Mania_Title_Cards) ? "Result_NamePlate_SuperT" : ((Ray_hud_type == 1) ? "Super_Mania_Plate" : "Ray_Super_text"), px + 0x09, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+						return true
+					}
+				}
+
+				if (Ray_hud_type == 1)
+				{
+					if (objA0.animation.sprite == 0x17 || objA0.animation.sprite == 0x31 || objA0.animation.sprite == 0x36)
+					{
+						Renderer.drawCustomSprite(getCharacterBonusTextIcon(getMainCharacter()), px-60, py-5, 0, SPRITE_FLAG_PRIO, renderQueue-1)
+						Renderer.drawCustomSprite("hud_text_score_mania", px - 96, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+						HUD.drawNumber("hud_digit_%d_mania", player.score * 10, px + 88, py, renderQueue)
+						return true
+					}
+					else if (objA0.animation.sprite == 0x18 || objA0.animation.sprite == 0x32 || objA0.animation.sprite == 0x37)
+					{
+						Renderer.drawCustomSprite(getCharacterBonusTextIcon(getMainCharacter()), px+77, py-5, 0, SPRITE_FLAG_PRIO, renderQueue-1)
+						Renderer.drawCustomSprite("hud_text_ring_stage_mania", px, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+						Renderer.drawCustomSprite("hud_text_bonus_stage_mania", px + 40, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+						HUD.drawNumber("hud_digit_%d_mania", results.ring_bonus * 10, px + 184, py, renderQueue)
+						return true
+					}
+					else if (objA0.animation.sprite == 0x19 || objA0.animation.sprite == 0x33 || objA0.animation.sprite == 0x38)
+					{
+						Renderer.drawCustomSprite(getCharacterBonusTextIcon(getMainCharacter()), px+52, py-5, 0, SPRITE_FLAG_PRIO, renderQueue-1)
+						Renderer.drawCustomSprite("hud_text_perfect_mania", px, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+						HUD.drawNumber("hud_digit_%d_mania", results.time_bonus * 10, px + 184, py, renderQueue)
+						return true
+					}
+					else if (objA0.animation.sprite == 0x1a || objA0.animation.sprite == 0x34 || objA0.animation.sprite == 0x39)
+					{
+						Renderer.drawCustomSprite(getCharacterBonusTextIcon(getMainCharacter()), px+60, py-5, 0, SPRITE_FLAG_PRIO, renderQueue-1)
+						Renderer.drawCustomSprite("hud_text_continue_stage_mania", px, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+						return true
+					}
+				}			
+			}
+		}
+		if (Ray_hud_type == 1)
+		{
+			// Level results texts
+			if (objA0.update_address == 0x02dd98)
+			{
+				if (objA0.animation.sprite == 0x0b)
+				{
+					Renderer.drawCustomSprite(getCharacterBonusTextIcon(getMainCharacter()), px+36, py-5, 0, SPRITE_FLAG_PRIO, renderQueue-1)
+					Renderer.drawCustomSprite("hud_text_total_mania", px, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+					return true
+				}
+				else if (objA0.animation.sprite == 0x0c)
+				{
+					Renderer.drawCustomSprite(getCharacterBonusTextIcon(getMainCharacter()), px+37, py-5, 0, SPRITE_FLAG_PRIO, renderQueue-1)
+					Renderer.drawCustomSprite("hud_text_bonus_mania", px, py, 0, SPRITE_FLAG_PRIO, renderQueue+1)
+					return true
+				}
+				else if (objA0.animation.sprite == 0x0d)
+				{
+					Renderer.drawCustomSprite("hud_text_ring_mania", px, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+					return true
+				}
+				else if (objA0.animation.sprite == 0x0e)
+				{
+					Renderer.drawCustomSprite("hud_text_time_mania", px, py, 0, SPRITE_FLAG_PRIO, renderQueue-2)
+					return true
+				}
+			}
+		}
+		if (objA0.update_address == 0x2004AA) || (objA0.update_address == 0x2004AC)
+		{
+			Ray_Dust(px, py, flags, renderQueue)
+			return true
+		}
+		//ENDING
+		if (objA0.update_address == 0x05ebb4 && Mods.isModActive("Extra Slot Mighty") && End_Pilot == 1)
+		{
+			atex = 0x40 + 3 * 0x20
+			key = (System.getGlobalVariableValueByName("Mighty_Sprite_type") == 1) ? "S3_Mighty_head_big" : "Mania_Mighty_head_big"
+			Renderer.drawCustomSprite(key, px, py, atex, flags, renderQueue)
+			return true
+		}
+		//small characters on the tornado
+		//this object address is for BOTH the character ON the plane and the driver!
+		//check its subtype as well
+		else if (objA0.update_address == 0x05ed18) //standing character
+		{
+			if (objA0.subtype2c != 0) //standing character
+			{
+				atex = 0x40 + getMainCharacter() * 0x20
+				// key = (Sprite_type == 0) ? "MightyMini" : "Mini_Mighty_S3"
+				key = (Ray_Sprite_type == 0) ? "MiniRay_Mania" : "MiniRay_S3"
+				Renderer.drawCustomSprite(key, px, py, atex, flags, renderQueue, 0, 255)		
+				return true
+			}
+			else //pilot
+			{ // DON'T RENDER HERE
+				if (Mods.isModActive("Extra Slot Mighty") && End_Pilot == 1)
+				{
+					atex = 0x40 + 3 * 0x20
+					key = (System.getGlobalVariableValueByName("Mighty_Sprite_type") == 1) ? "S3_Mighty_head_small" : "Mania_Mighty_head_small"
+					Renderer.drawCustomSprite(key, px, py, atex, flags, renderQueue, 0, 255)		
+					return true
+				}
+				else
+					return false
+			}
+		}
+		else if (objA0.update_address == 0x05d86a)
+		{   
+			//if flying left use the micro character
+			if (char.render_flags & 0x01)
+			{
+				atex = 0x40 + 0x20 * getMainCharacter()
+				key = "RayMicro"
+				u64 pilot = "Micro_Pilot"
+
+				u8 atex2 = 0x40 + 3 * 0x20
+	
+				Renderer.drawCustomSprite(key, px + 1, py, atex, flags, renderQueue+1) // Mighty on the plane
+				Renderer.drawCustomSprite(pilot, px, py, (Mods.isModActive("Extra Slot Mighty") && End_Pilot == 1) ? atex2 : 0, flags, renderQueue+1) // The pilot and the plane
+				Renderer.addSpriteMask(px - 11, py - 28, 23, 20, renderQueue + 1, 8000)
+			}
+			else
+			{ //this would be the small tornado, so render normally.
+				return false
+			}		
+		}
+		// Continue Screen
+		if (global.game_mode == 0x14)
+		{
+			atex = 0x40 + getMainCharacter() * 0x20
+			// Continue Icons
+			if (objA0.update_address == 0x05ca5c)
+			{
+				key = stringformat((Ray_Sprite_type == 0) ? "continue_icon_Ray_Mania_0x%02x" : "continue_icon_Ray_S3_0x%02x", objA0.animation.sprite)
+				Renderer.drawCustomSprite(key, px, py, atex, flags, renderQueue)
+				return true
+			}
+			else if (objA0.update_address == 0x05c74a) // continue animation
+			{
+				if (Ray_Sprite_type == 0)
+					key = stringformat("Mania_continue_0x%02x", objA0.animation.sprite)
+				else
+					key = stringformat("S3_continue_0x%02x", objA0.animation.sprite)
+				Renderer.drawCustomSprite(key, px, py, atex, flags, renderQueue)
+				return true
+			}
+			else if (objA0.update_address == 0x0160d2) // Tail
+			{
+				key = stringformat((Ray_Sprite_type == 0) ? "character_Mania_tails_0x%02x" : "character_slot2_tails_0x%02x", objA0.animation.sprite)
+				Renderer.drawCustomSprite(key, px, py - 4, atex, flags, renderQueue)
+				return true
+			}
+			// Ray waiting and running
+			else if (objA0.update_address == 0x05c790)
+			{
+				u64 name = (Ray_Sprite_type == 0) ? "Mania_Ray" : "character_slot2"
+
+				if (objA0.animation.sprite >= 0xbf && objA0.animation.sprite <= 0xc0)
+				{
+					u8 anim = objA0.animation.sprite = ((global.framecounter >> 2) % (4) + 0x21)
+					key = stringformat("%s_0x%02x", name, anim)
+				}
+				else
+					key = stringformat("%s_0x%02x", name, objA0.animation.sprite)
+				
+				Renderer.drawCustomSprite(key, px, py - 4, atex, flags, renderQueue)
+				return true
+			}
+		}
+		if (gameMode == 0x34 || gameMode == 0x48 || gameMode == 0x2c || gameMode == 0x30 || global.game_mode == 0x85 || global.game_mode == 0x87) //just check for Ray, thanks!
+		{
+			if (bluespheres.xtrachar)
+			{
+				u8 atex2 = 0x40
+				if (objA0.mapping_offset == 0x146620)
+				{
+					if (Mods.isModActive("Extra Slot Mighty"))
+					{
+						atex2 = 0x40 + 3 * 0x20
+
+						if (objA0.animation.sprite == 0xb4)
+							objA0.animation.sprite = 0xb1
+						
+						if (System.getGlobalVariableValueByName("Mighty_Sprite_type") == 0)
+							key = stringformat("character_slot1_0x%02x", objA0.animation.sprite)
+						else
+							key = stringformat("character_slot1_S3_0x%02x", objA0.animation.sprite)
+					}
+					else
+					{
+						key = stringformat(stringformat("%s_0x%02x", getCharacterSpriteKey(0)), objA0.animation.sprite)
+						if (!Renderer.hasCustomSprite(key))
+						{
+							u32 sourceBase    = (char.character == CHARACTER_SONIC) ? ((objA0.animation.sprite >= 0xda) ? 0x140060 : 0x100000) : (char.character == CHARACTER_TAILS) ? ((objA0.animation.sprite >= 0xd1) ? 0x143d00 : 0x3200e0) : 0x1200e0
+							u32 tableAddress  = (char.character == CHARACTER_SONIC) ? (super.active ? 0x148378 : 0x148182) : (char.character == CHARACTER_TAILS) ? 0x14a08a : 0x14bd0a
+							u32 mappingOffset = (char.character == CHARACTER_SONIC) ? (super.active ? 0x146816 : 0x146620) : (char.character == CHARACTER_TAILS) ? 0x148eb8 : 0x14a8d6		// Not really necessary here, we could also use "char.mapping_offset"
+
+							key = Renderer.setupCustomCharacterSprite(sourceBase, tableAddress, mappingOffset, objA0.animation.sprite, 0x00)
+						}
+					}
+					Renderer.drawCustomSprite(key, px, py, atex2, flags, renderQueue)
+					return true
+				}
+				else if (objA0.update_address == 0x04e29c)
+				{
+					atex = getatex(0x02)
+					u8 animation = ((global.framecounter >> 3) % (4) + 0xb1)
+					key = (Ray_Sprite_type == 0) ? stringformat("Mania_Ray_0x%02x", animation) : stringformat("character_slot2_0x%02x", animation)
+					if (animation == 0xb4)
+					{
+						key = (Ray_Sprite_type == 0) ? "Mania_Ray_0xb2" : "character_slot2_0xb2"
+					}
+					Renderer.drawCustomSprite(key, px, py, atex, flags, renderQueue)
+					return true
+				}
+				else if (char.animation.sprite >= 0xb0 && char.animation.sprite <= 0xb4 && objA0.update_address == 0x04dffe)
+				{
+					atex = getatex(0x02)
+					key = (Ray_Sprite_type == 0) ? stringformat("Mania_Ray_0x%02x", objA0.animation.sprite) : stringformat("character_slot2_0x%02x", objA0.animation.sprite)
+					Renderer.drawCustomSprite(key, px, py, atex, flags, renderQueue)
+					return true
+				}
+			}
+			// Characters in special stage
+			if (objA0.update_address == 0x00903e)// || objA0.update_address == 0x00927a) Just player one, thanks!
+			{
+				u8 character = getMainCharacter()
+				paletteKey = stringformat("slot2palette_bluesphere_0%d", Ray_Pal)
+				key = (Ray_Sprite_type == 0) ? stringformat("bluesphere_slot2_Mania_0x%02x", objA0.animation.sprite) : stringformat("bluesphere_slot2_0x%02x", objA0.animation.sprite)
+				if (Renderer.hasCustomSprite(key))
+				{
+					// Check if there's also a custom palette
+					if (System.hasExternalPaletteData(paletteKey, 0))
+					{
+						atex = 0x40 + character * 0x20
+					}
+				}
+				else //let's say someone deleted the bluespheres sprites...at least they'll see sonic...
+				{
+					//I don't care it's internal sprite rendering! Pick the external palette ANYWAY!
+
+					if (System.hasExternalPaletteData(paletteKey, 0))
+					{
+						atex = 0x40 + character * 0x20
+					}
+					key = Renderer.setupCustomCharacterSprite(0x28f95a, 0x2908d2, objA0.mapping_offset, objA0.animation.sprite, atex)
+				}
+				Renderer.drawCustomSprite(key, px, py, atex, flags, renderQueue)
+				return true
+			}
+			// Tails' tails object in special stage
+			if (objA0.update_address == 0x009488)
+			{
+				atex = 0x10
+				key = (Ray_Sprite_type == 0) ? stringformat("Ray_Tail_Mania_%d", objA0.animation.sprite) : stringformat("Ray_Tail_%d", objA0.animation.sprite)
+
+				if (Renderer.hasCustomSprite(key))
+				{
+					// Check if there's also a custom palette
+					paletteKey = stringformat("slot2palette_bluesphere_0%d", Ray_Pal)
+					if (System.hasExternalPaletteData(paletteKey, 0))
+					{
+						u16 tempValue = ((getMainCharacter() == CHARACTER_TAILS) ? getMainCharacter() : getSecondCharacter())
+						atex = (tempValue == 0xff) ? 0x40 : 0x40 + tempValue * 0x20
+					}
+				}
+				else
+				{
+					key = Renderer.setupCustomCharacterSprite(0x2909e8, 0x291106, objA0.mapping_offset, objA0.animation.sprite, 0x10)
+				}
+				// System.writeDisplayLine(stringformat("atex = %x", atex))
+				Renderer.drawCustomSprite(key, px, py, atex, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue) // disable for now
+				return true
+			}
+		}
+		// Continue icon blue spheres
+		if ((objA0.update_address == 0x02ebe8 || objA0.update_address == 0x02ec4a) && objA0.animation.sprite >= 0x29 && objA0.animation.sprite <= 0x2b)
+		{
+			key = (Ray_Sprite_type == 0) ? "continue_icon_Ray_Mania_0x00" : "continue_icon_Ray_S3_0x00"
+			atex = 0x40 + CHARACTER_TAILS * 0x20
+			Renderer.drawCustomSprite(key, px, py, atex, flags, renderQueue)
+			return true
+		}
+
+		if (objA0.update_address == 0x05e18a) 
+		{	
+			if (outro.ending_type >= 0 && !DONT)
+				SuperandHyperPalette_Ray()
+			Renderer.drawCustomSprite(stringformat("RayPose_0x%02x", objA0.animation.sprite), px + ((objA0.animation.sprite == 3) ? 0x30 : 0x50), py, 0x60, objA0.render_flags | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
+			return true        
+		}
+
+		if (objA0.update_address == 0x02d8e2 && Custom_Banner) //&& global.zone != 0x0c
+		{
+			if (Display_Ray_Banner && global.zone == 0x0c)
+				return base.Standalone.onWriteToSpriteTable(px, py, renderQueue)
+			else
+			{
+				key = (Ray_Banner_Text == 0 && Ray_Zone_Banner == 1) ? "DA" : (Ray_Banner_Text == 0) ? "DAGE_def" : (Ray_Banner_Text == 1) ? "S3_air" : (Ray_Banner_Text == 2) ? "S3" : (Ray_Banner_Text == 3) ? "S&K" : "S3&K"
+				Renderer.drawCustomSprite(stringformat("titleCard_Ray_in_%s", key), px - 0x20, py - 0x40, 0x00, SPRITE_FLAG_PRIO | SPRITE_FLAG_NO_GLOBAL_TINT, renderQueue)
+				return true
+			}
+		}
+	}
+	
+	return base.Standalone.onWriteToSpriteTable(px, py, renderQueue)
+}
+
+function u64 GetXtraName(u8 xtrachar, u8 char)
+{
+	if (xtrachar == 2 && char == CHARACTER_TAILS)
+		return (!Ray_Sprite_type) ? "slot2_M" : "slot2"
+
+	return base.GetXtraName(xtrachar, char)
+}
+
+//# address-hook(0x0081c6) end(0x00858e)
+function void SpecialStage()
+{
+	//let's load this only for Ray
+	if (XtraChar != 2)
+	{
+		base.SpecialStage()
+		return
+	}
+
+#if STANDALONE
+	playMusic(MUSIC_CTRL_FADEOUT)
+#else
+	playMusic(MUSIC_CTRL_STOP)
+#endif
+
+	kosinski.queue_size = 0
+	zeroMemory(0xffffff10, 0x6c)
+
+	ClearPatternLoadingQueue()
+	FadeScreenToWhiteBlocking()
+
+#if STANDALONE
+	// Add a small artificial delay here
+	for (u8 i = 0; i < 12; ++i)
+		yieldInWhiteScreen()
+#endif
+
+	set_status_register(0x2700)
+
+	VDP.Config.enableHInt(false)
+	VDP.Config.setNameTableBasePlaneA(0xc000)
+	VDP.Config.setNameTableBasePlaneB(0xe000)
+	VDP.Config.setPlayfieldSizeInPixels(512, 256)
+	VDP.Config.setupWindowPlane(false, 0)	// Disable window plane
+	VDP.Config.setVerticalScrolling(false, 0)
+	VDP.Config.setBackdropColor(0x20)
+	VDP.Config.setRenderingModeConfiguration(false)
+	water.fullscreen = 0
+
+	fn0011ca()
+
+	zeroMemory(0xffffac00, 0x400)
+	zeroMemory(0xffffb000, 0x2000)
+	zeroMemory(0xfffffe6e, 0x4c)
+	zeroMemory(0xffffe400, 0x100)
+
+	u32[0xfffffe66] = 0
+	u32[0xfffffe6a] = 0
+
+	fn01aa6e()
+
+	u16[0xfffffb00] = 0
+	u32[0xfffffbfc] = 0xfffffb00
+
+	// Load special stage palette
+	//  -> Character colors is the 8 colors from 0xfffffc90 (for Sonic/Knuckles) and 0xfffffcb0 (for Tails)
+	copyMemory(0xfffffc80, 0x00896e, 0x100)
+
+#if STANDALONE
+	u64 paletteKey = stringformat("slot2palette_bluesphere_0%d", Ray_Pal)
+
+	u16 numColors = System.loadExternalPaletteData(paletteKey, 0, 0x800000, 0x20)
+	if (numColors > 0)
+	{
+		u32 dest = 0x802180 + getMainCharacter() * 0x40
+		for (u16 i = 0; i < numColors; ++i)
+		{
+			u16[dest + i * 2] = packColor(u32[0x800000 + i * 4])
+			if (Ray_shoe_color == 0)
+			{
+				if (Ray_Pal == 6)
+				{
+					u16[dest + 2 * 12] = 0x0526
+					u16[dest + 2 * 13] = 0x0402
+					u16[dest + 2 * 14] = 0x034D
+				}
+				else
+				{
+					// u16[dest + 2 * 10] = 0x008c
+					u16[dest + 2 * 12] = 0x000e
+					u16[dest + 2 * 13] = 0x0008
+					u16[dest + 2 * 14] = 0x064e
+				}
+			}
+
+			if (Rays_Grays == 1 && (Ray_Pal == 1 || Ray_Pal == 2 || Ray_Pal == 6 || Ray_Pal == 9))
+			{
+				u16[dest + 2 * 4] = 0x0ecc
+				u16[dest + 2 * 5] = 0x0866
+				u16[dest + 2 * 15] = 0x0caa
+			}
+		}
+	}
+#endif
+
+	Nemesis.loadDataToVRAM(0x0b07b8, 0x0000)
+
+	fn0085b0()
+
+	Enigma.decompress(0x0aef54, 0xffff5500, 0x0000)
+	copyRectToVRAM(0xffff5500, 0xc000, 0x28, 0x1c)
+
+	Nemesis.loadDataToVRAM(0x0ad904, 0xd000)
+	Nemesis.loadDataToVRAM(0x0adf60, 0xb4e0)
+	Nemesis.loadDataToVRAM(0x0aeed0, 0xb360)
+	Nemesis.loadDataToVRAM(0x0ad472, 0xabe0)
+	Nemesis.loadDataToVRAM(0x0ad5f4, 0xdf00)
+	Nemesis.loadDataToVRAM(0x0ad650, 0xf020)
+
+	A0 = 0x0ad650
+	A4 = 0xffffe020
+	fn0015cc()
+
+	Nemesis.loadDataToVRAM(0x0ad7bc, 0xb120)
+	Nemesis.loadDataToVRAM(0x0ad430, 0xf400)
+
+	copyRectToVRAM(0x008d2c, 0xc084, 0x08, 0x03)
+	copyRectToVRAM(0x008d2c, 0xc0bc, 0x08, 0x03)
+
+	Enigma.decompress(0x0aedb0, 0xffff0000, 0x459b)
+	copyRectToVRAM(0xffff0000, 0xe000, 0x40, 0x20)
+
+	Kosinski.decompress(0x0b2e36, 0xffff0000)
+
+	fn009ea0()
+	fn00a0e6()
+
+	global.level_started = 0
+	bluespheres.bs_hud_dirty = 0xff
+	bluespheres.rings_flags = 0x80
+	bluespheres.current_gamespeed = 0x1000
+	bluespheres.speedup_countdown = BlueSpheres.useGeneratedStages() ? 2700 : 1800
+	camera.foreground.x.u16 = 0
+	camera.foreground.y.u16 = 0
+	level.height.bitmask = 0xffff
+
+	u32[0xffffb000] = 0x008faa
+	if (getNumPlayers() >= 2)
+	{
+		u32[0xffffb04a] = 0x009212
+	}
+	u32[0xffffb094] = 0x008df8
+	u32[0xffffb0de] = 0x008e40
+	UpdateGameObjects()
+
+	fn009d9e()
+	fn009dde()
+	RenderSprites()
+
+	BlueSpheres.RenderSpheres()
+	fn009d5e()
+
+	u8[0xffffe433] = 0x01
+	global.frame_state = 0x1c
+
+	waitForNextFrame()
+
+	u8[0xffffe433] = 0
+	VDP.Config.setRenderingModeConfiguration(true)		// Enable shadow/highlight palette mode
+
+	global.demo_countdown = 1800
+	fn0075d2()
+
+#if STANDALONE
+	if (BlueSpheres.useGeneratedStages())
+	{
+		playMusic(0xf8)		// Different music track, one that speeds up the music only every 45 (instead of 30) seconds
+	}
+	else
+#endif
+	{
+		playMusic(0x1c)
+	}
+
+	VDP.Config.setActiveDisplay(true)
+	BlueSpheres.FadeIn()
+
+	while (true)
+	{
+		UpdateGamePause()
+		global.frame_state = 0x1c
+		Kosinski.ProcessDecompressionQueue()
+
+		waitForNextFrame()
+	@EntryPoint:
+
+		++level.framecounter
+		UpdateRollingDemo()
+		UpdateGameObjects()
+
+		fn009d9e()
+		fn009dde()
+		RenderSprites()
+
+		BlueSpheres.RenderSpheres()
+		BlueSpheres.RenderCharacterSprites()
+		fn009d5e()
+		fn009b62()
+
+	#if GAMEAPP
+		BlueSpheres.renderCustomGround()
+		BlueSpheres.renderCustomCharacterShadows()
+	#else
+	#if STANDALONE
+		Renderer.setViewport(getScreenExtend(), 0, 320, 224, 0x0000)
+	#endif
+	#endif
+
+		LoadRequiredSpritePatterns()
+		Kosinski.ProcessModules()
+
+		if (global.rolling_demo && global.demo_countdown == 0)
+			break
+
+		if (global.game_mode != 0x34)	// Blue Spheres game mode
+			break
+
+	#if STANDALONE
+		// Only needed to support restart from the Pause Menu
+		//  -> Not used at the moment, so nevermind
+		if (level.restart)
+		{
+			global.game_mode = 0x0c
+			return
+		}
+	#endif
+	}
+
+	if (global.rolling_demo)
+	{
+		global.game_mode = 0
+	}
+
+	global.demo_countdown = 60
+	palette_fade.range = 0x003f
+	u16[0xfffff794] = 0
+
+	while (true)
+	{
+		global.frame_state = 0x1c
+
+		waitForNextFrame()
+
+		UpdateRollingDemo()
+		UpdateGameObjects()
+
+		fn009d9e()
+		fn009dde()
+		RenderSprites()
+
+		BlueSpheres.RenderSpheres()
+		fn009d5e()
+		fn009b62()
+
+	#if GAMEAPP
+		BlueSpheres.renderCustomGround()
+		BlueSpheres.renderCustomCharacterShadows()
+	#else
+	#if STANDALONE
+		Renderer.setViewport(getScreenExtend(), 0, 320, 224, 0x0000)
+	#endif
+	#endif
+
+		LoadRequiredSpritePatterns()
+		Kosinski.ProcessModules()
+
+		--u16[0xfffff794]
+		if (s16[0xfffff794] < 0)
+		{
+			u16[0xfffff794] = 2
+			FadePaletteToWhite()
+		}
+
+		if (global.demo_countdown == 0)
+			break
+	}
+}
+
+function bool Standalone.onDrawVdpSpriteCompound(s16 px, s16 py, u8 size, u16 index, u16 renderQueue, u8 spriteCounter)
+{
+    if (objA0.update_address == 0x00d30c || objA0.update_address == 0x00d42c)
+    {
+        if (index == 0xab0b || index == 0xab17)    //Sonic icon
+        {
+			u64 key = Ray_menu_sprites()
+            if (objA0.animation.sprite == 5 && objA0.animation.timer == 2)
+            {
+                if (Renderer.hasCustomSprite(key))
+                {
+                    return true
+                }
+            }
+        }
+    }
+
+    return base.Standalone.onDrawVdpSpriteCompound(px, py, size, index, renderQueue, spriteCounter)
+}
+
+function string Ray_LivesandContinues()
+{
+	return (Mods.isModActive("Mania Style Data Select")) ? "dataSel_lifeContinue_Ray" : (Ray_Sprite_type == 0) ? "dataSel_lifeContinue_slot2_mania" : "dataSel_lifeContinue_slot2"
+}
+
+global u8 Ray_Pal
+function string getCharacterPaletteKey(u8 character)
+{
+	u8 gameMode = global.game_mode & 0x7f
+	if ((XtraChar == 2 && character == CHARACTER_TAILS && gameMode != 0x4c && gameMode != 0x44 && gameMode != 0x2c && gameMode != 0x30) || character == 4 || gameMode != 0x4c && (global.characters != CHARS_TAILS_ALONE && character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0 && global.game_mode != 0x9c) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) && global.game_mode != 0x9c || (Ray_Partner == 3 && XtraChar == 1 && global.game_mode != 0x9c) || (Ray_Partner == 4 && global.game_mode != 0x9c)) ) ))
+	{
+		return getExtraCharacterPaletteKey(0x02)
+	}
+    return base.getCharacterPaletteKey(character)
+}
+
+// Returns the palette key of the specified extra character.
+function string getExtraCharacterPaletteKey(u8 xtrachar)
+{
+	if (xtrachar == 0x02)
+	{
+		return stringformat("slot2palette_0%d", Ray_Pal)
+	}
+	
+	// Return the base function
+	return base.getExtraCharacterPaletteKey(xtrachar)
+}
+
+//# address-hook(0x05d9ee) end(0x05da4e)
+function void fn05d9ee()
+{
+	// Falling from space
+	if (XtraChar == 2 && Mods.isModActive("Extra Slot Mighty") && End_Pilot == 1)
+	{
+		ExtraChar.loadCharacterPalette(0x01, 0x802080 + u32(0x01 * 0x40), 0x00)
+		ExtraChar.loadSpecialPalettes(0x01, CHARACTER_SONIC, 0x802080 + u32(0x01 * 0x40), 0x00)
+	}
+	
+	base.fn05d9ee()
+}
+
+// Here so that Ray's palette loads for Knuckles' ending
+//# address-hook(0x05b2d4) end(0x05b2d4)
+function void fn05b2d4()
+{
+	if (isMainCharacter(CHARACTER_KNUCKLES))
+	{
+		u32 address = 0x802280
+		loadCharacterPalette(4, address, 0) // Ray palette
+		ShoesandGrayspalettes(address)
+	}
+	base.fn05b2d4()
+}
+
+function void ShoesandGrayspalettes(u32 address)
+{
+	if (Ray_shoe_color == 0)
+	{
+		if (Ray_Pal == 6)
+		{
+			u16[address + 2 * 8] = 0x034d
+			u16[address + 2 * 9] = 0x0526
+			u16[address + 2 * 19] = 0x0402 // Mania third red shoe color
+		}
+		else
+		{
+			u16[address + 2 * 8] = 0x000e
+			u16[address + 2 * 9] = 0x0008
+			u16[address + 2 * 19] = (Ray_Pal == 9) ? 0x0212 : 0x0004 // Mania third red shoe color
+		}
+	}
+	if (Rays_Grays == 1 && (Ray_Pal == 1 || Ray_Pal == 2 || Ray_Pal == 6 || Ray_Pal == 6 || Ray_Pal == 9))
+	{
+		u16[address + 2 * 12] = 0x0ecc
+		u16[address + 2 * 13] = 0x0caa
+		u16[address + 2 * 14] = 0x0866
+	}
+	if (Ray_Pal == 3 && Ray_Sprite_type == 0)
+		u16[address + 2 * 11] = 0x0026
+
+}
+
+#if STANDALONE
+
+function string getManiaInspSignpost(u8 character)
+{
+	u64 key = (Ray_Sprite_type) ? "Mania_Signpost_slot2_S3" : "Mania_Signpost_slot2"
+
+	if (Renderer.hasCustomSprite(key))
+	{
+		if (XtraChar == 0)
+		{
+			if (isMainCharacter(CHARACTER_SONIC))
+			{
+				if (character == CHARACTER_TAILS)
+				{
+					if (Ray_Partner == 1 || Ray_Partner == 4)
+						return key
+				}
+			}
+			else if (isMainCharacter(CHARACTER_KNUCKLES))
+			{
+				if (character == CHARACTER_TAILS)
+				{
+					if (Ray_Partner == 2 || Ray_Partner == 4)
+						return key
+				}
+			}
+		}
+		else if (XtraChar == 2 && character == CHARACTER_TAILS)
+			return key
+	}
+	else
+		return 0x00
+
+	return base.getManiaInspSignpost(character)
+}
+
+#endif
+
+
+// Ending pose fixes
+function string getCharacterEndPosePaletteKey(u8 character)
+{
+	if (XtraChar != 2)
+	{
+		return base.getCharacterEndPosePaletteKey(character)
+	}
+
+	return " "
+}
+
+function u8 getModdedEndPosePaletteLine(u8 character, bool isHyperEffect)
+{
+	if (XtraChar != 2)
+	{
+		return base.getModdedEndPosePaletteLine(character, isHyperEffect)
+	}
+	return 0
+}
+
+function void loadCharacterEndPosePalette(u8 character, u32 targetAddress, u8 paletteVariant)
+{
+	if (XtraChar != 2)
+	{
+		base.loadCharacterEndPosePalette(character, targetAddress, paletteVariant)
+		return
+	}
+
+}
+
+function bool UpdatePaletteEffects.SuperForm.endpose()
+{
+	if (XtraChar != 2)
+	{
+		return base.UpdatePaletteEffects.SuperForm.endpose()
+	}
+	return false
+}
+
+function void UpdatePaletteEffects.SuperForm.endpose.moddingVersion(u8 characterVersion)
+{
+	if (XtraChar != 2)
+	{
+		base.UpdatePaletteEffects.SuperForm.endpose.moddingVersion(characterVersion)
+		return
+	}
+}

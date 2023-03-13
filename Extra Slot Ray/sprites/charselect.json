@@ -1,0 +1,10 @@
+{
+	"dataSel_slot2":  { "File": "dataSel_character_ray.bmp", "Rect": "0,1,35,39", "Center": "16,39" },
+	"dataSel_slot2_Mania":  { "File": "dataSel_character_ray_mania.bmp", "Rect": "3,1,32,39", "Center": "16,39" },
+	"dataSel_lifeContinue_slot2":  { "File": "character_ray_misc.bmp", "Rect": "99,76,25,40", "Center": "1,0" },
+	"dataSel_lifeContinue_slot2_mania":  { "File": "Rayven.bmp", "Rect": "480,751,25,40", "Center": "1,0" },
+	"dataSel_life_slot2":  { "File": "character_ray_misc.bmp", "Rect": "100,76,21,16", "Center": "0,0" },
+	"dataSel_life_slot2_Mania":  { "File": "Rayven.bmp", "Rect": "481,751,21,16", "Center": "0,0" },
+	"dataSel_lifeContinue_Ray":  { "File": "dataSel_lifeContinue_Ray.png", "Rect": "0,0,25,40", "Center": "5,16" },
+	"dataSel_life_Ray":  { "File": "dataSel_lifeContinue_Ray.png", "Rect": "0,0,25,17", "Center": "5,16" }
+}

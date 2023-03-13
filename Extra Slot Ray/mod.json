@@ -1,0 +1,320 @@
+{
+	"Metadata":
+	{
+		"Name": "Extra Slot Ray",
+		"Author": "Fabchaotix, CancerEdition, campbellsonic, iCloudius",
+		"Description": "Play as Ray in Sonic 3 A.I.R without taking up another character's slot. He can glide like cape Mario and be used as a hang glider when used as a partner.",
+		"URL": "",
+		"ModVersion": "v2.0",
+		"GameVersion": "v22.05.15.0"
+	},
+	"Settings":
+	{
+		"Group1":
+		[
+			{
+				"InternalName": "Boost",
+				"DisplayName": "Air Boost",
+				"Variable": "Ray_Boost",
+				"DefaultValue": "1",	
+				"Category": "Gameplay",			
+				"Options":
+				{
+					"0": "Off",
+					"1": "On"
+				}
+			},
+			{
+				"InternalName": "Partner",
+				"DisplayName": "Partner Ray",
+				"Variable": "Ray_Partner",
+				"DefaultValue": "0",
+				"Category": "Gameplay",				
+				"Options":
+				{
+					"0": "Off",
+					"1": "Sonic",
+					"2": "Knuckles",
+					"3": "Mighty",
+					"4": "All three"
+				}
+			},
+			{
+				"InternalName": "The Elementals",
+				"DisplayName": "Elemental Shields",
+				"Variable": "Ray.Elemental.Shields",
+				"DefaultValue": "0",
+				"Category": "Gameplay",				
+				"Options":
+				{
+					"0": "Off",
+					"1": "On"
+				}
+			},
+			{
+				"InternalName": "Ray Shield Inputs",
+				"DisplayName": "Shield Button",
+				"Variable": "Ray_Shield_Button",
+				"DefaultValue": "0x10",	
+				"Category": "Controls",			
+				"Options":
+				{
+					"0x10": "B",
+					"0x20": "C",
+					"0x40": "A"
+				}
+			},
+			{
+				"InternalName": "RaySprites",
+				"DisplayName": "Ray's Sprites",
+				"Variable": "Ray_Sprite_type",
+				"DefaultValue": "1",
+				"Category": "Appearance",				
+				"Options":
+				{
+					"0": "Mania",
+					"1": "Sonic 3"
+				}
+			},
+			{
+				"InternalName": "Ray's Palette",
+				"DisplayName": "Ray's Palette",
+				"Variable": "Ray_Pal",
+				"DefaultValue": "0",
+				"Category": "Appearance",				
+				"Options":
+				{
+					"0": "Sonic 3",
+					"1": "SegaSonic",
+					"2": "Mania",
+					"3": "Acorn",
+					"4": "Golden Delicious",
+					"5": "Apricot",
+					"6": "Guava",
+					"7": "Banana",
+					"8": "Hardware",
+					"9": "Undertale: Bits & Pieces"
+				}
+			},
+			{
+				"InternalName": "Ray's Grays",
+				"DisplayName": "Grays",
+				"Variable": "Rays_Grays",
+				"DefaultValue": "0",
+				"Category": "Appearance",				
+				"Options":
+				{
+					"0": "Unique",
+					"1": "Consistent"
+				}
+			},
+			{
+				"InternalName": "RedOctobers",
+				"DisplayName": "Shoes",
+				"Variable": "Ray_shoe_color",
+				"DefaultValue": "1",
+				"Category": "Appearance",				
+				"Options":
+				{
+					"0": "Red",
+					"1": "Blue"
+				}
+			},
+			{
+				"InternalName": "Super Palettes",
+				"DisplayName": "Super/Hyper Glow",
+				"Variable": "Ray_Glow",
+				"DefaultValue": "0",
+				"Category": "Super Palette",				
+				"Options":
+				{
+					"0": "Cycle",
+					"1": "Flash White"
+				}
+			},
+			{
+				"InternalName": "Ray HUD Type",
+				"DisplayName": "HUD",
+				"Variable": "Ray_hud_type",
+				"DefaultValue": "0",
+				"Category": "Appearance",				
+				"Options":
+				{
+					"0": "Default",
+					"1": "Mania"
+				}
+			},
+			{
+				"InternalName": "Spring Fall",
+				"DisplayName": "Bouncing off a Spring",
+				"Variable": "Ray_Twirl_Fall",
+				"DefaultValue": "0",
+				"Category": "Falling animation",		
+				"Options":
+				{
+					"0": "Off",
+					"1": "On"
+				}
+			},
+			{
+				"InternalName": "Transform Fall",
+				"DisplayName": "After Transforming",
+				"Variable": "Ray_Transform_Fall",
+				"DefaultValue": "1",	
+				"Category": "Falling animation",	
+				"Options":
+				{
+					"0": "Off",
+					"1": "On"
+				}
+			},
+			{
+				"InternalName": "From AIZ to that one zone",
+				"DisplayName": "Level Transitions",
+				"Variable": "Ray_Level_Transition_Fall",
+				"DefaultValue": "0",
+				"Category": "Falling animation",		
+				"Options":
+				{
+					"0": "Off",
+					"1": "On"
+				}
+			},
+			{
+				"InternalName": "Uncurl",
+				"DisplayName": "While Uncurled",
+				"Variable": "Ray_Uncurled_Fall",
+				"DefaultValue": "0",
+				"Category": "Falling animation",		
+				"Options":
+				{
+					"0": "Off",
+					"1": "On"
+				}
+			},
+			{
+				"InternalName": "White Flash",
+				"DisplayName": "Super/Hyper White Flash",
+				"Variable": "Ray_Flash",
+				"DefaultValue": "0",
+				"Category": "Super Palette",				
+				"Options":
+				{
+					"0": "Pure White",
+					"1": "Mostly White"
+				}
+			},
+			{
+				"InternalName": "SmoothRotation",
+				"DisplayName": "Smooth Sprite Rotation",
+				"Variable": "Ray_Smooth_setting",
+				"DefaultValue": "1",
+				"Category": "Appearance",				
+				"Options":
+				{
+					"0": "On",
+					"1": "Off"
+				}
+			},
+			{
+				"InternalName": "Underwater super/hyper palletes",
+				"DisplayName": "Underwater Palletes",
+				"Variable": "Ray_UnderDaSea",
+				"DefaultValue": "1",
+				"Category": "Super Palette",				
+				"Options":
+				{
+					"0": "Off",
+					"1": "On"
+				}
+			},
+			{
+				"InternalName": "Expanded Hyper palette",
+				"DisplayName": "Use Hyper Sonic's palette",
+				"Variable": "Ray_EXPAL",
+				"DefaultValue": "0",
+				"Category": "Super Palette",				
+				"Options":
+				{
+					"0": "Off",
+					"1": "On"
+				}
+			},
+			{
+				"InternalName": "Ray Display",
+				"DisplayName": "Enable Custom Banner",
+				"Variable": "Custom_Banner",
+				"DefaultValue": "1",
+				"Category": "Zone Banner",		
+				"Options":
+				{
+					"0": "No",
+					"1": "Yes"
+				}
+			},
+			{
+				"InternalName": "Ray Banner Text",
+				"DisplayName": "Banner Text",
+				"Variable": "Ray_Banner_Text",
+				"DefaultValue": "1",
+				"Category": "Zone Banner",				
+				"Options":
+				{
+					"0": "DA Garden",
+					"1": "Sonic 3 A.I.R",
+					"2": "Sonic 3",
+					"3": "Sonic & Knuckles",
+					"4": "Sonic 3 & Knuckles"
+				}
+			},
+			{
+				"InternalName": "Ray Banner Display",
+				"DisplayName": "Show Banner in DDZ",
+				"Variable": "Display_Ray_Banner",
+				"DefaultValue": "0",
+				"Category": "Zone Banner",		
+				"Options":
+				{
+					"0": "Yes",
+					"1": "No"
+				}
+			},
+			{
+				"InternalName": "Ray Zone Banner",
+				"DisplayName": "DA Garden Zone Banner",
+				"Variable": "Ray_Zone_Banner",
+				"DefaultValue": "0",
+				"Category": "Zone Banner",				
+				"Options":
+				{
+					"0": "Default",
+					"1": "DA Garden"
+				}
+			},
+			{
+				"InternalName": "Ray Pilot",
+				"DisplayName": "Ending Pilot",
+				"Variable": "End_Pilot",
+				"DefaultValue": "0",
+				"Category": "Misc.",				
+				"Options":
+				{
+					"0": "Sonic",
+					"1": "Mighty (ESM required)"
+				}
+			},
+			{
+				"InternalName": "Ray Unique speed shoes",
+				"DisplayName": "Speed Shoes Icon",
+				"Variable": "Ray_Speed_Shoes",
+				"DefaultValue": "0",
+				"Category": "Misc.",				
+				"Options":
+				{
+					"0": "Unique",
+					"1": "Default"
+				}
+			}
+		]
+	}
+}

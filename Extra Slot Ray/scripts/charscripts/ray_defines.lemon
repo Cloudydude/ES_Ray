@@ -1,0 +1,116 @@
+// === VARIABLES ===
+global u8	glideDirection					// direction of Ray's glide (0 = up, 1 = down)
+global u8	glideSwoopTimer					// time elapsed since Ray's last swoop
+global s16	glideSwoopCounterweight			// Ray's swooping counterweight
+global s16	glideSwoopAccel					// Ray's swooping acceleration
+global s16	glideSwoopTarget				// Ray's swooping target
+
+global u8	glideAnim						// Ray's gliding animation
+global u8	glideAnimFrame					// Ray's gliding anim frame
+global u8	glideAnimTimer					// Ray's gliding anim timer
+
+global u8	useRayDashAnim					// Flag for using high-speed dash anim as Ray
+
+
+// === CONSTANTS ===
+
+// direction enum
+define u8	GLIDE_UP							= 0
+define u8	GLIDE_DOWN							= 1
+
+// Ray gliding values
+define s16	GLIDE_INIT_X_UP						= 0x0300
+define s16	GLIDE_INIT_Y_UP						= -(((GLIDE_INIT_X_UP) >> 1) + ((GLIDE_INIT_X_UP) >> 2) + ((GLIDE_INIT_X_UP) >> 4)) 
+
+define s16	GLIDE_INIT_X_DOWN					= 0x0300
+define s16	GLIDE_INIT_Y_DOWN					= -(((GLIDE_INIT_X_DOWN) >> 1) + ((GLIDE_INIT_X_DOWN) >> 2) + ((GLIDE_INIT_X_DOWN) >> 4))
+
+define s16	GLIDE_Y_ACCEL_UP					= 0x000C
+define s16	GLIDE_MAX_Y_VEL_UP					= 0x00C0
+
+define s16	GLIDE_Y_ACCEL_DOWN					= 0x002A
+define s16	GLIDE_MAX_Y_VEL_DOWN				= 0x0A00
+
+define s16	GLIDE_X_ACCEL_UP					= (-1 * 0x000e)
+define s16	GLIDE_MIN_X_VEL						= 0x0120
+
+define s16	GLIDE_MIN_X_VEL_GRABBED				= 0x0256
+
+define s16	GLIDE_X_ACCEL_DOWN					= 0x0016
+define s16	GLIDE_MAX_X_VEL						= 0x0700
+
+define s16	GLIDE_MAX_X_VEL_HYPER_BOOST			= 0x900
+
+define s16	GLIDE_INIT_Y_DOWN_BOOST				= (-1 * 0x0040)
+
+// Ray gliding values (underwater)
+define s16	GLIDE_INIT_X_UP_WATER				= 0x180
+define s16	GLIDE_INIT_Y_UP_WATER				= -(((GLIDE_INIT_X_UP_WATER) >> 1) + ((GLIDE_INIT_X_UP_WATER) >> 2) + ((GLIDE_INIT_X_UP_WATER) >> 4))
+
+define s16	GLIDE_INIT_X_DOWN_WATER				= 0x180
+define s16	GLIDE_INIT_Y_DOWN_WATER				= -(((GLIDE_INIT_X_DOWN_WATER) >> 1) + ((GLIDE_INIT_X_DOWN_WATER) >> 2) + ((GLIDE_INIT_X_DOWN_WATER) >> 4))
+
+define s16	GLIDE_Y_ACCEL_UP_WATER				= (0x000C / 4)
+define s16	GLIDE_MAX_Y_VEL_UP_WATER			= (0x00C0)
+
+define s16	GLIDE_Y_ACCEL_DOWN_WATER			= (0x002A / 3)
+define s16	GLIDE_MAX_Y_VEL_DOWN_WATER			= 0x0300
+
+define s16	GLIDE_X_ACCEL_UP_WATER				= ((-1 * 0x000e) / 3)
+define s16	GLIDE_MIN_X_VEL_WATER				= ((0x0120 * 3) / 4)
+
+define s16	GLIDE_MIN_X_VEL_GRABBED_WATER		= ((0x0256 * 3) / 4)
+
+define s16	GLIDE_X_ACCEL_DOWN_WATER			= ((0x0016 * 5) / 12)
+define s16	GLIDE_MAX_X_VEL_WATER				= (0x0700 / 2)
+
+define s16	GLIDE_MAX_X_VEL_HYPER_BOOST_WATER	= (0x900 / 2)
+
+define s16	GLIDE_INIT_Y_DOWN_BOOST_WATER		= ((-1 * 0x0040) / 2)
+
+// Ray gliding initial x/y velocity fractions
+define s8	GLIDE_INITX_UP_FRAC_NUM				= 5				// numerator for fraction of x vel to use as x vel when facing upwards
+define s8	GLIDE_INITX_UP_FRAC_DENOM			= 12			// denominator for fraction of x vel to use as x vel when facing upwards
+define s8	GLIDE_INITY_UP_FRAC_NUM				= 1				// numerator for fraction of x vel to use as y vel when facing upwards
+define s8	GLIDE_INITY_UP_FRAC_DENOM			= 3				// denominator for fraction of x vel to use as y vel when facing upwards
+
+define s8	GLIDE_INITX_DOWN_FRAC_NUM			= 2				// numerator for fraction of x vel to use as x vel when facing downwards
+define s8	GLIDE_INITX_DOWN_FRAC_DENOM			= 3				// denominator for fraction of x vel to use as x vel when facing downwards
+define s8	GLIDE_INITY_DOWN_FRAC_NUM			= 1				// numerator for fraction of y vel to use as y vel when facing downwards
+define s8	GLIDE_INITY_DOWN_FRAC_DENOM			= 3				// denominator for fraction of y vel to use as y vel when facing downwards
+
+// Ray gliding swoop values
+define u8	GLIDE_INIT_COUNTERWEIGHT			= 0				// starting counterweight value
+define u8	GLIDE_COUNTERWEIGHT_INCREASE		= 0xB0			// amount counterweight increases by with each swoop
+define u8	GLIDE_COUNTERWEIGHT_WATER_EXTRA		= 0xA0			// additional constant counterweight applied while underwater
+define u8	GLIDE_SWOOP_STEPS					= 10			// number of frames for Ray to swoop upwards before returning to normal gliding physics
+define u8	GLIDE_SWOOP_MIN_FRAC_NUM			= 4				// numerator for fraction of x vel to use as target y vel
+define u8	GLIDE_SWOOP_MIN_FRAC_DENOM			= 5				// denominator for fraction of x vel to use as target y vel
+define s16	GLIDE_SWOOP_DOWN_MIN_Y				= (-1 * 0x0280)	// when y vel is under this, y accel is multiplied by 4 to prevent "fish flop"
+define u8	GLIDE_SWOOP_DELAY					= 0x2e			// number of frames before Ray can swoop again
+
+// Animation stuff
+define u8	GLIDE_ANIM_MAIN						= 0
+define u8	GLIDE_ANIM_UP_FRAME_FIRST			= 0xBF
+define u8	GLIDE_ANIM_DOWN_FRAME_FIRST			= 0xC1
+define u8	GLIDE_ANIM_MAIN_FRAMES				= 2
+define u8	GLIDE_ANIM_MAIN_SPEED				= 2
+
+define u8	GLIDE_ANIM_TURN						= 1
+define u8	GLIDE_ANIM_TURN_FRAME_FIRST			= 0xC5
+define u8	GLIDE_ANIM_TURN_FRAME_LAST			= 0xC7
+define u8	GLIDE_ANIM_TURN_FRAMES				= 3
+define u8	GLIDE_ANIM_TURN_SPEED				= 4
+
+define u16	RAY_DASH_ANIM_SPEED					= 0xa00
+define u8	RAY_DASH_ANIM_FRAME_FIRST			= 0xDA
+define u8	RAY_DASH_ANIM_FRAME_LAST			= 0xDD
+
+define u8 FreeFall = u8[0xffffE656 + ((A0 == 0xffffb000) ? 0 : 0x01)]
+define u8 Force_Fall = u8[0xffffF735 + ((A0 == 0xffffb000) ? 0 : 0x01)]
+define u8 Should_fall_anim = u8[0xffffF737 + ((A0 == 0xffffb000) ? 0 : 0x01)]
+define u8 Fall_Anim_Corkscrew = u8[0xffffF739 + ((A0 == 0xffffb000) ? 0 : 0x01)]
+define u8 SuperFall = u8[0xffffF73B + ((A0 == 0xffffb000) ? 0 : 0x01)]
+
+// define u8	RAY_SPRING_ANIM_FRAME_1				= 0xA8
+// define u8	RAY_SPRING_ANIM_FRAME_2				= 0x8E

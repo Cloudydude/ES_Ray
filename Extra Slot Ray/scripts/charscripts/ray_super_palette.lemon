@@ -1,0 +1,220 @@
+global bool Ray_Glow
+global bool Ray_Flash
+global bool Ray_EXPAL
+global bool Ray_UnderDaSea
+
+function void SuperandHyperPalette_Ray()
+{
+	u8 character = getMainCharacter()
+					
+	bool isHyperEffect = (super.active == 0xff || super.active.tails == 0xff)
+	u16 nextFrame = (super.palettefx.frame + 6) % (isHyperEffect ? 108 : 18)
+	u16 Ray_FlashOpacity = 0x100
+	if (Ray_Glow != 0)
+		Ray_FlashOpacity = (Ray_Flash == 0) ? 0x100 : 0xc8
+
+	u16 blendFactor = super.palettefx.timer * Ray_FlashOpacity / (isHyperEffect ? 0x07 : 0x0f)
+
+	if (nextFrame % 18 == 0)
+		blendFactor = Ray_FlashOpacity - blendFactor
+	else if (nextFrame % 18 == 12)
+		blendFactor = 0
+	for (u8 underwater = 0; underwater < (level.water_present ? 2 : 1); ++underwater)
+	{
+		u32 offset = character * 0x40 + (underwater ? 0x300 : 0)
+		u32 source = 0x802180 + offset
+		u32 dest   = 0x802000 + offset
+		u32 dest2  = 0x802300 + offset
+
+		// Load modded Super palette
+		u8 line = 5
+		if (isHyperEffect && Ray_EXPAL)
+		{
+			// Hyper color cycle (if mod supports it)
+			line = 6 + super.palettefx.frame / 18
+			if (!System.hasExternalPaletteData(getCharacterPaletteKey(character), line))
+				line = 5
+		}
+		u8 line2 = 0
+		if (Ray_UnderDaSea)
+		{
+			if (underwater)
+				line += (global.zone == 0 || global.zone == 5) ? 7 : 14
+			line2 = line+1
+		}
+		zeroMemory(dest, 0x40)
+		u16 numColors = System.loadExternalPaletteData(getCharacterPaletteKey(character), line, 0x800000, 0x20)
+		for (u16 i = 0; i < numColors; ++i)
+		{
+			u32 rgba = u32[0x800000 + i * 4]
+			u16[dest + i * 2] = (rgba & 0xff000000) ? packColorExt(rgba) : 0
+		}
+
+		if (Ray_UnderDaSea)
+		{
+			u16 numColors2 = System.loadExternalPaletteData(getCharacterPaletteKey(character), line2, 0x800000, 0x20)
+			for (u16 i = 0; i < numColors2; ++i)
+			{
+				u32 rgba = u32[0x800000 + i * 4]
+				u16[dest2 + i * 2] = (rgba & 0xff000000) ? packColorExt(rgba) : 0
+			}
+		}
+
+		for (u8 k = 0; k < 0x40; k += 2)
+		{
+			if (u16[dest + k] == 0)
+			{
+				// Use original color as fallback
+				u16[dest + k] = u16[source + k]
+			}
+			else
+			{
+				// Apply flash effect
+				u16[dest + k] = blendColorsPacked(u16[dest + k], ((Ray_Glow == 0) ? u16[source + k] : 0x0eee), blendFactor)
+			}
+		}
+	}
+	--super.palettefx.timer
+	if (super.palettefx.timer < 0)
+	{
+		super.palettefx.timer = isHyperEffect ? 0x07 : 0x0f
+		super.palettefx.frame = nextFrame
+	} 
+}
+
+function void UpdatePaletteEffects.SuperForm.moddingVersion(u8 characterVersion)
+{
+	if (XtraChar != 2)
+	{
+		base.UpdatePaletteEffects.SuperForm.moddingVersion(characterVersion)
+		return
+	}
+
+	if (super.palettefx.state & 0x80)
+	{
+		SuperandHyperPalette_Ray()
+	}
+	else if (super.palettefx.state == 1)
+	{
+		// Update ongoing palette effect
+		u8 character = getMainCharacter()
+		bool isHyperEffect = (super.active == 0xff || super.active.tails == 0xff)
+
+		--super.palettefx.timer
+		if (super.palettefx.timer >= 0)
+			return
+
+		// Fade in effect
+		super.palettefx.frame += 6
+		super.palettefx.timer = 1
+
+		for (u8 underwater = 0; underwater < (level.water_present ? 2 : 1); ++underwater)
+		{
+			u16 blendFactor = clamp((super.palettefx.frame + (1 - super.palettefx.timer) * 6 / 2) * 0x100 / 0x24, 0, 0x100)
+			
+			u32 offset = character * 0x40 + (underwater ? 0x300 : 0)
+			u32 source = 0x802180 + offset
+			u32 dest   = 0x802000 + offset
+			u32 dest2  = 0x802300 + offset
+
+			// Load modded Super palette
+			u8 line = 5
+			if (isHyperEffect && Ray_EXPAL == 1)
+			{
+				// Hyper color cycle (if mod supports it)
+				line = 7
+				if (!System.hasExternalPaletteData(getCharacterPaletteKey(character), line))
+					line = 5
+			}
+			u8 line2 = 0
+			if (Ray_UnderDaSea)
+			{
+				if (underwater)
+					line += (global.zone == 0 || global.zone == 5) ? 7 : 14
+				line2 = line+1
+			}
+
+			zeroMemory(dest, 0x40)
+			u16 numColors = System.loadExternalPaletteData(getCharacterPaletteKey(character), line, 0x800000, 0x20)
+			for (u16 i = 0; i < numColors; ++i)
+			{
+				u32 rgba = u32[0x800000 + i * 4]
+				u16[dest + i * 2] = (rgba & 0xff000000) ? packColorExt(rgba) : 0
+			}
+
+			if (Ray_UnderDaSea)
+			{
+				u16 numColors2 = System.loadExternalPaletteData(getCharacterPaletteKey(character), line2, 0x800000, 0x20)
+				for (u16 i = 0; i < numColors2; ++i)
+				{
+					u32 rgba = u32[0x800000 + i * 4]
+					u16[dest2 + i * 2] = (rgba & 0xff000000) ? packColorExt(rgba) : 0
+				}
+			}
+
+			for (u8 k = 0; k < 0x40; k += 2)
+			{
+				if (u16[dest + k] == 0)
+				{
+					// Use original color as fallback
+					u16[dest + k] = u16[source + k]
+				}
+				else
+				{
+					// Apply flash effect
+					u16[dest + k] = blendColorsPacked(u16[source + k], u16[dest + k], blendFactor)
+				}
+			}
+		}
+
+		if (super.palettefx.frame < 36)
+			return
+				
+		// Fully faded in
+		super.palettefx.state = 0xff
+		u8[0xffffb02e] = 0		// Reset "char.control_flags"
+	}
+	else  // (super.palettefx.state == 2)
+	{
+		// Fade out
+		if (super.palettefx.frame >= 30)
+		{
+			// This is the first frame, set everything so that only the timer is used
+			super.palettefx.frame = 0
+			super.palettefx.frame.tails = 0
+			super.palettefx.timer = 0x11
+		}
+
+		u16 blendFactor = clamp(u16(super.palettefx.timer) * 0x100 / 0x12, 0, 0x100)
+		for (u8 underwater = 0; underwater < (level.water_present ? 2 : 1); ++underwater)
+		{
+			u32 offset = getMainCharacter() * 0x40 + (underwater ? 0x300 : 0)
+			u32 source = 0x802180 + offset
+			u32 dest   = 0x802000 + offset
+
+			for (u8 k = 0; k < 0x40; k += 2)
+			{
+				if (u16[dest + k] == 0)
+				{
+					// Use original color as fallback
+					u16[dest + k] = u16[source + k]
+				}
+				else
+				{
+					// Apply flash effect
+					u16[dest + k] = blendColorsPacked(u16[source + k], u16[dest + k], blendFactor)
+				}
+			}
+		}
+		
+		if (super.palettefx.timer == 0)
+		{
+			// Fully faded out
+			super.palettefx.state = 0
+		}
+		else
+		{
+			--super.palettefx.timer
+		}
+	}
+}

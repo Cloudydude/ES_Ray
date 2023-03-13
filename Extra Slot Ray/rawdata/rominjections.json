@@ -1,0 +1,12 @@
+{
+"ray_idle":
+	{
+		"File": "Ray Idle.bin",
+		"RomInject": "0x213880"
+	},
+"ray_tails":
+	{
+		"File": "Ray Tail.bin",
+		"RomInject": "0x1FF86B"
+	}
+}

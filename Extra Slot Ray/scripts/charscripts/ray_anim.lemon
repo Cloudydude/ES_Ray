@@ -1,0 +1,1054 @@
+//# address-hook(0x0160d2)
+function void TailsTails.Update()
+{
+	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && !isMainCharacter(CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	{
+		// Update various properties from Tails main object
+		A2 = 0xffff0000 + u16[A0 + 0x30]
+		objA0.position.x.u16 = u16[A2 + 0x10]
+		objA0.position.y.u16 = u16[A2 + 0x14]
+		u8[A0 + 0x26] = u8[A2 + 0x26]			// Rotation
+		objA0.flags2a = u8[A2 + 0x2a]			// Flags
+		objA0.sprite_priority = u16[A2 + 0x08]
+		objA0.sprite_attributes = (objA0.sprite_attributes & 0x7fff) | (u16[A2 + 0x0a] & 0x8000)
+
+		D0 = u8[A2 + 0x20]
+		if ((u8[A2 + 0x2a] & 0x20) && u8[0xfffff7c9] == 0)
+		{
+			if (u8[A2 + 0x22] >= 0xa9 && u8[A2 + 0x22] <= 0xac)
+			{
+				D0 = 4
+			}
+		}
+		if (u8[A0 + 0x34] != D0.u8)
+		{
+			u8[A0 + 0x34] = D0.u8
+			objA0.state = u8[0x016164 + D0.s16]
+		}
+
+		//Address for Ray's tail animation
+		A1 = (Ray_Sprite_type == 0) ? 0x016196 : 0x1FF86B
+		UpdateTailsAnimation_inner()
+		if (global.inv_gravity && objA0.state != 0x03)
+		{
+			objA0.render_flags ^= render_flag.FLIP_Y
+		}
+
+		TailsTails.UpdateSpritePatterns()
+		DrawObject()
+	}
+	else
+	{
+		base.TailsTails.Update()
+		return
+	}
+}
+
+// Use Sonic's animations instead of Tails's, and redirect to gliding animation when needed
+//# address-hook(0x015862) end(0x015aae)
+function void UpdateTailsAnimation()
+{
+	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	{
+		if (/*(objA0.state == char.state.RUNNING && global.zone_act == 0x0c00) || */tails.ai_routine == 0x04 || tails.ai_routine == 0x0E || tails.ai_routine == 0x10 || tails.ai_routine == 0x22 || (char.state == char.state.TAILS_FLYDOWN && global.zone_act != 0x0201) || (char.state == char.state.RUNNING && global.zone_act == 0x0d01 && u8[A0 + 0x2e] == 0x81))	// Flying like Tails
+		{
+			glideDirection = GLIDE_UP
+			RayGlide_Animate()
+		}
+		else if (char.double_jump_state != 0 && char.double_jump_state != -1 && !IsUsingShield) 	// Gliding
+		{
+			RayGlide_Animate()
+		}
+		else if (char.state == char.state.STRAIGHTJUMP)	// Spring straight jump
+		{
+			base.UpdateTailsAnimation()	// Use Tails version of animation with two frames, then correct the sprites
+			char.animation.sprite = 0x8E
+		}
+		else	// Normal animation
+		{
+			if (char.state != char.state.former)
+			{
+				char.state.former = char.state
+				char.animation.frame = 0
+				char.animation.timer = 0
+				char.flags &= ~char.flag.PUSHING
+			}
+
+			if (char.state == char.state.STANDING && abs(char.groundspeed) > 0x70 && global.zone != 0x17)
+				char.state = char.state.RUNNING
+
+			A1 = /*(super.active) ? 0x012c3a : */ 0x012aa6
+			A1 = tableLookupAddress(A1, char.state * 2)
+			
+			if (char.state == char.state.STANDING)
+			{
+				A1 = 0x213880	// address of Ray's new idle animation
+			}
+			
+			D0.u8 = u8[A1]
+
+			if (D0.u8 < 0x80)
+			{
+				updateSonicAnimationStanding()
+			}
+			else if (D0.u8 == 0xff)
+			{
+				updateSonicAnimationRunning()
+			}
+			else if (D0.u8 == 0xfe)
+			{
+				updateSonicAnimationRolling()
+			}
+			else
+			{
+				--char.animation.timer
+				if (s8(char.animation.timer) < 0)
+				{
+					// Animation update of Tails' tails while rolling
+					D1.u16 = u16[A2 + 0x18]
+					D2.u16 = u16[A2 + 0x1a]
+					LookupAngleByVector()
+					if (global.zone == 0x15)
+					{
+						D0.u8 += u8[0xffffe400]
+					}
+
+					D2.u8 = char.flags & char.flag.FACING_LEFT
+					if (D2.u8 == 0)
+						D0.u8 ^= 0xff
+					else
+						D0.u8 += 0x80
+
+					D0.u8 += 0x10
+					D1 = (D0.s8 < 0) ? 3 : 0
+
+					char.render_flags &= 0xfc
+					D2.u8 ^= D1.u8
+					char.render_flags |= D2.u8
+
+					if (global.inv_gravity)
+						char.render_flags ^= render_flag.FLIP_Y
+
+					D3.u8 = (D0.u8 >> 3) & 0x0c
+					A1 = 0x0161c2
+					char.animation.timer = 3
+					updateSonicAnimation_shared()
+					char.animation.sprite += D3.u8
+				}
+			}
+		}
+	}
+	else
+	{
+		base.UpdateTailsAnimation()
+		return
+	}
+}
+
+function u8 RayGlide_Direction()
+{
+	u8 sprite
+	u8 speed
+	u8 numFrames
+	
+	if (glideAnim == GLIDE_ANIM_MAIN)
+	{
+		// normal glide animation
+		
+		if (glideDirection == GLIDE_UP)
+		{
+			sprite = GLIDE_ANIM_UP_FRAME_FIRST
+		}
+		else
+		{
+			sprite = GLIDE_ANIM_DOWN_FRAME_FIRST
+		}
+		sprite += glideAnimFrame
+		
+		speed = GLIDE_ANIM_MAIN_SPEED
+		numFrames = GLIDE_ANIM_MAIN_FRAMES
+	}
+	else
+	{
+		// turning animation
+		
+		if (glideDirection == GLIDE_UP)
+		{
+			sprite = GLIDE_ANIM_TURN_FRAME_LAST
+			sprite -= glideAnimFrame
+		}
+		else
+		{
+			sprite = GLIDE_ANIM_TURN_FRAME_FIRST
+			sprite += glideAnimFrame
+		}
+		
+		speed = GLIDE_ANIM_TURN_SPEED
+		numFrames = GLIDE_ANIM_TURN_FRAMES
+	}
+
+	// advance timer
+	glideAnimTimer++
+	
+	if (glideAnimTimer == speed)
+	{
+		glideAnimTimer = 0
+		glideAnimFrame++
+		if (glideAnimFrame == numFrames)
+		{
+			glideAnimFrame = 0
+			glideAnim = GLIDE_ANIM_MAIN
+		}
+	}
+	return sprite
+}
+// Custom animation code for gliding
+function void RayGlide_Animate()
+{	
+	char.animation.sprite = RayGlide_Direction()
+	
+	if (char.flags & char.flag.FACING_LEFT)
+	{
+		char.render_flags |= render_flag.FLIP_X
+	}
+	else
+	{
+		char.render_flags &= ~render_flag.FLIP_X
+	}
+	char.render_flags &= ~render_flag.FLIP_Y
+}
+
+
+// Function to change between gliding animations
+function void RayGlide_ChangeAnim(u8 anim)
+{
+	glideAnim = anim
+	glideAnimFrame = 0
+	glideAnimTimer = 0
+}
+
+
+// Hide Tails's tails object except when idle
+//# address-hook(0x0160d2)
+function void TailsTails.Update()
+{
+	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	{
+		A1 = 0xffff0000 + u16[A0 + 0x30]
+		
+		if (u8[A1 + 0x20] == char.state.STANDING)
+		{
+			base.TailsTails.Update()
+		}
+	}
+	else
+	{
+		base.TailsTails.Update()
+		return
+	}
+}
+
+
+// Use Sonic's run animation but still have a high-speed dash animation
+function void updateSonicAnimationRunning()
+{
+	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	{
+		D0 = 0
+		if ((u8[A0 + 0x2d] & 0x80) || char.rotation.x != 0)
+		{
+			updateCharacterAnimationRunning_shared()
+		}
+		else
+		{
+			D0.u8 = (s8(char.rotation) > 0) ? (char.rotation - 1) : char.rotation
+			D2.u8 = char.flags & char.flag.FACING_LEFT
+			if (D2.u8 == 0)
+				D0.s8 = -D0.s8 - 1
+
+			D0.u8 += 0x10
+			D1 = (D0.u8 & 0x80) ? (render_flag.FLIP_X | render_flag.FLIP_Y) : 0
+			D2.u8 ^= D1.u8
+
+			char.render_flags &= 0xfc
+			char.render_flags |= D2.u8
+
+			if (char.flags & char.flag.PUSHING)
+			{
+				updateSonicAnimationPushing()
+				return
+			}
+
+			D0.u8 = (D0.u8 >> 4) & 0x06
+			D2.u16 = abs(char.groundspeed)
+			if (char.bonus_effect & char.bonus.INFINITE_INERTIA)
+				D2.u16 *= 2
+
+			if (D2.u16 < 0x600)
+			{
+				A1 = 0x012aee
+				D3.u8 = D0.u8 * 4
+			}
+			else
+			{
+				A1 = 0x012af8
+				D3.u8 = D0.u8 * 2
+					
+				useRayDashAnim = (D2.u16 >= RAY_DASH_ANIM_SPEED)	// use dash anim if fast enough
+			}
+
+			D0.u8 = u8[A1 + char.animation.frame + 1]
+		#if STANDALONE
+			if (D0.u8 >= 0xfe)		// 0xfe is possible in rare cases when Sonic touches ground while being carried by Tails
+		#else
+			if (D0.u8 == 0xff)
+		#endif
+			{
+				char.animation.frame = 0
+				D0.u8 = u8[A1 + 1]
+			}
+
+			char.animation.sprite = D0.u8 + D3.u8
+			--char.animation.timer
+			if (s8(char.animation.timer) < 0)
+			{
+				char.animation.timer = max(0x800 - D2.s16, 0) >> 8
+				++char.animation.frame
+			}
+		}
+	}
+	else
+	{
+		base.updateSonicAnimationRunning()
+		return
+	}
+}
+
+
+// Use normal jump animation for Tails
+function void updateSonicAnimationRolling()
+{
+	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	{
+		D1.u8 = char.flags & char.flag.FACING_LEFT
+		char.render_flags = (char.render_flags & 0xfc) | D1.u8
+
+		--char.animation.timer
+		if (s8(char.animation.timer) >= 0)
+			return
+
+		D2.u16 = abs(char.groundspeed)
+		//A1 = (D2.u16 < 0x600) ? 0x015b18 : 0x015b1d
+		A1 = (D2.u16 < 0x600) ? 0x012b02 : 0x012b0c
+
+		D2.u16 = max(0x400 - D2.s16, 0) >> 8
+		char.animation.timer = D2.u8
+
+		updateSonicAnimation_shared()
+	}
+	else
+	{
+		base.updateSonicAnimationRolling()
+		return
+	}
+}
+
+
+// Use Sonic's pushing animation
+//# address-hook(0x012a72) end(0x012aa2)
+function void updateSonicAnimationPushing()
+{
+	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	{
+		--char.animation.timer
+		if (s8(char.animation.timer) < 0)
+		{
+			D2.s16 = 0x800 - abs(char.groundspeed)
+			D2.s16 = max(D2.s16, 0) >> 6
+			char.animation.timer = D2.u8
+			//A1 = 0x015b22
+			A1 = 0x012b16
+
+			updateSonicAnimation_shared()
+		}
+	}
+	else
+	{
+		base.updateSonicAnimationPushing()
+		return
+	}
+}
+
+function bool Standalone.drawCharacterSprite(u8 character, u8 variant, s16 px, s16 py, bool asSmallGhost)
+{
+
+	//Ray's animations will override the normal render
+	if (global.xtrachar == 2 || (A0 != 0xffffb000 && !isMainCharacter(CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	{//custom render routines
+		return RayCustomRendering(character, variant, px, py, asSmallGhost)
+	}
+	else
+	{
+		return base.Standalone.drawCharacterSprite(character, variant, px, py, asSmallGhost)
+	}
+}
+
+global u8 Ray_Smooth_setting
+
+global bool hang_tail
+
+global bool Val_Deter
+
+global bool Flap
+
+global bool Ray_shoe_color
+
+global bool StopAnimation
+
+global bool Rays_Grays
+
+
+
+global u8 flapframes
+global u8 RayFrameCounter
+global u8 RayLookingUpFrameCounter
+global u8 RayLookingDownFrameCounter
+global bool Ray_Sprite_type
+
+global bool Ray_Twirl_Fall
+global bool Ray_Transform_Fall
+global bool Ray_Level_Transition_Fall
+global bool Ray_Uncurled_Fall
+
+global bool TurnOffRayTail
+
+// Render Ray's high-speed dash animation
+function bool RayCustomRendering(u8 character, u8 variant, s16 px, s16 py, bool asSmallGhost)
+{
+	//System.writeDisplayLine(stringformat("char.double_jump_state = %d", char.double_jump_state))
+	bool isPlayer1 = (variant == 0)
+	u32 characterAddress = isPlayer1 ? 0xffffb000 : 0xffffb04a
+
+	bool TailControl = (!isMainCharacter(CHARACTER_TAILS) && !isSecondCharacter(CHARACTER_TAILS)) // Check wether Ray is used for act transitions
+
+	// Check only needed for Tails' tails
+	if (variant == 2)
+	{
+		// No smooth rotation in Slot Machine
+		if (global.zone == 0x15)
+			return false
+
+		characterAddress = 0xffff0000 + u16[A0 + 0x30]
+
+		// Do not render when blinking after hit
+		if (u8[characterAddress + 0x34] != 0 && (u8[characterAddress + 0x34] & 0x04) == 0)
+		{
+			// Prevent emulator-like rendering
+			return true
+		}
+
+		// Do not render when Tails looks into the background (e.g. LBZ 2 end cutscene) and in DEZ gravity transporters
+		if (u8[characterAddress + 0x22] >= 0x55 && u8[characterAddress + 0x22] <= 0x5b)
+		{
+			// Prevent emulator-like rendering
+			return true
+		}
+
+		// Only render when standing still
+		if (TailControl)
+		{
+			if (u8[characterAddress + 0x20] != 0x05)
+				return true
+		}
+		else 
+		{
+			if (u8[characterAddress + 0x22] != 0xba)
+				return true // Prevent emulator-like rendering
+		}
+
+		isPlayer1 = (characterAddress == 0xffffb000)
+		character = CHARACTER_TAILS
+	}
+
+	if (level.vertical_wrap == 0xff00)
+	{
+		// For vertically wrapping levels, "normalize" py into interval [-move_area.bottom.target * 3/4, -move_area.bottom.target * 1/4]
+		py &= level.height.bitmask
+		if (py > move_area.bottom.target * 3/4 && move_area.bottom.target >= 0xe0)	// move_area.bottom.target is very low in DEZ boss act
+			py -= move_area.bottom.target
+	}
+
+	u8 animationSprite = char.animation.sprite
+	u16 animationSpriteEx = Standalone.getModdedAnimationSpriteEx(character, animationSprite)
+	u8 flags = (char.render_flags & 0x03)
+	u8 angle = 0
+	u64 key = 0
+	u8 rotationMode = 0
+	u8 Smooth_ctrl = (Ray_Smooth_setting == 0) ? 2 : 1
+
+	bool eggmobile_LBZ2 = (global.zone_act == 0x0601 && u8[0xfffff7ff] == 0xff)
+
+	if (variant < 2)
+	{
+		//Fake genesis rotation
+		if (!Game.getSetting(SETTING_SMOOTH_ROTATION))
+		{
+			//WALK
+			if (animationSprite >= 0x01 && animationSprite <= 0x20)
+			{
+				angle = (animationSprite - 0x01) / 8 * 0xe0 * ((global.inv_gravity) ? -1 : 1)
+				if (char.flags & char.flag.FACING_LEFT)
+					angle = -angle
+				animationSprite = 0x01 + (animationSprite - 0x01) % 8
+			}
+			//RUN
+			else if (animationSprite >= 0x21 && animationSprite <= 0x30)
+			{
+				angle = (animationSprite - 0x21) / 4 * 0xe0 * ((global.inv_gravity) ? -1 : 1)
+				if (char.flags & char.flag.FACING_LEFT)
+					angle = -angle
+				animationSprite = ((useRayDashAnim && Game.getSetting(SETTING_SUPERFAST_RUNANIM)) ? RAY_DASH_ANIM_FRAME_FIRST : 0x21) + (animationSprite - 0x21) % 4
+			}
+			//Hanging in AIZ
+			else if (animationSprite >= 0x78 && animationSprite <= 0x7f)
+			{
+				angle = (animationSprite - 0x78) * 0xe0 * ((global.inv_gravity) ? -1 : 1)
+				if (char.flags & char.flag.FACING_LEFT)
+					angle = -angle
+				animationSprite = 0x78
+			}
+			//Hanging in MHZ
+			else if (animationSprite >= 0xeb && animationSprite <= 0xee)
+			{
+				angle = (animationSprite - 0xeb) * 0xe0 * ((global.inv_gravity) ? -1 : 1)
+				if (char.flags & char.flag.FACING_LEFT)
+					angle = -angle
+				animationSprite = 0xeb
+			}
+		}
+		else
+		{
+			// Character
+			if (animationSprite >= 0x01 && animationSprite <= 0x20)
+			{
+				animationSprite = 0x01 + (animationSprite - 0x01) % 8
+				rotationMode = Smooth_ctrl
+			}
+			else if (animationSprite >= 0x21 && animationSprite <= 0x30)
+			{
+				animationSprite = ((useRayDashAnim && Game.getSetting(SETTING_SUPERFAST_RUNANIM)) ? RAY_DASH_ANIM_FRAME_FIRST : 0x21) + (animationSprite - 0x21) % 4
+				rotationMode = Smooth_ctrl
+			}
+			else if (animationSprite >= 0x78 && animationSprite <= 0x7f)
+			{
+				animationSprite = 0x78
+				rotationMode = 2
+			}
+			else if (character == CHARACTER_TAILS && animationSprite >= RAY_DASH_ANIM_FRAME_FIRST && animationSprite <= RAY_DASH_ANIM_FRAME_LAST)
+			{
+				rotationMode = 2
+			}
+
+			if (rotationMode != 0)
+			{
+				s8 oldRotation = isPlayer1 ? oldRotationPlayer1 : oldRotationPlayer2
+				flags = char.flags & char.flag.FACING_LEFT		// This really has to be "char.flags", not "char.render_flags"
+
+				angle = char.rotation
+				if (rotationMode == 1)
+				{
+					if (abs(s8(char.rotation)) <= 0x10 && abs(s8(oldRotation)) <= 0x10)
+					{
+						angle = 0
+					}
+
+					if (angle != char.rotation)
+					{
+						s8 diff = angle - oldRotation
+						angle = oldRotation + clamp(diff, -3, 3)
+					}
+				}
+			}
+
+			if (isPlayer1)
+				oldRotationPlayer1 = angle
+			else
+				oldRotationPlayer2 = angle
+		}
+		// We only want the tail hanging animation to play in FBZ and DEZ
+		if (global.zone == 0x04 || global.zone == 0x0b)
+		{
+			if (char.state == char.state.HANGING)
+			{
+				if (char.state.former == char.state.ROLLING && !Val_Deter)
+				{
+					hang_tail = ((System.rand() % 2) == 1) ? true : false
+					Val_Deter = true
+				}
+
+				if (hang_tail == true)
+					key = (Ray_Sprite_type == 0) ? "Mania_Ray_Tail_Hang" : "Tail_Hang"
+			}
+			else if (char.state == char.state.RUNNING)
+			{
+				if (animationSprite == 0x81)
+				{
+					hang_tail = false
+				}
+				else if (animationSprite == 0x84)
+				{
+					hang_tail = true
+				}
+			}
+			else
+			{
+				Val_Deter = false
+			}
+		}
+
+		// Very specific case
+		// Fix for Ray if he touches the ground, if he's transporting the player, and isn't meant to be a partner.
+		if (TailControl && global.zone_act != 0x0201)
+		{
+			if (objA0.state == char.state.ROLLING)
+			{
+				animationSprite = ((global.framecounter >> 1) % (8) + 0x96)
+				if (animationSprite == 0x98 || animationSprite == 0x9a || animationSprite == 0x9c || animationSprite == 0x9e)
+				{
+					animationSprite = 0x96
+				}
+				else if (animationSprite == 0x99)
+				{
+					animationSprite = 0x98
+				}
+				else if (animationSprite == 0x9b)
+				{
+					animationSprite = 0x99
+				}
+				else if (animationSprite == 0x9d)
+				{
+					animationSprite = 0x9a
+				}
+			}
+			else if (objA0.state == char.state.STANDING)
+			{
+				animationSprite = 0xba
+			}
+			else if (objA0.state == char.state.RUNNING)
+			{
+				animationSprite = ((global.framecounter >> 3) % (8) + 0x01)
+			}
+		}
+
+		if (objA0.state == char.state.RUNNING && global.zone_act == 0x0c00)
+		{
+			if (control.tails.state & CONTROL_UP)
+			{
+				if (glideDirection == GLIDE_DOWN)
+					RayGlide_ChangeAnim(GLIDE_ANIM_TURN)
+				glideDirection = GLIDE_UP
+				
+			}
+			else if (control.tails.state & CONTROL_DOWN)
+			{
+				if (glideDirection == GLIDE_UP)
+					RayGlide_ChangeAnim(GLIDE_ANIM_TURN)
+				glideDirection = GLIDE_DOWN
+			}
+			animationSprite = RayGlide_Direction()
+		}
+																									// Very rare bug where Ray would still be in his glide up animation when hurt
+		if ((fix_for_LRZ && objA0.animation.sprite == 0x8a && char.state != char.state.SPINDASH) || (char.state == char.state.GOT_HURT && (animationSprite == 0xbf || animationSprite == 0xc0)))
+			objA0.animation.sprite = 0x8d
+
+		// If not desending, then play the flap animation
+		if ((char.state == char.state.HANGING || ((char.control_flags & 0x01) && global.zone_act != 0x0a01 && animationSprite != 0xc7)|| char.rotation.x != 0 || !(char.flags & char.flag.IN_AIR) && char.state == char.state.RUNNING) && !isSonicIntro())
+		{
+			FadeoutSnds()
+			Ray.Boosts = false
+			Flap = true
+			flapframes = 0
+		}
+
+		if (Ray.Boosts && (animationSprite == 0xbf || animationSprite == 0xc0) && StopAnimation)
+		{
+			if (char.velocity.y > 0)
+			{
+				Flap = false
+
+				if (RayFrameCounter < 4)
+				{
+					key = (Ray_Sprite_type == 0) ? "Mania_Boost_0" : "Boost_frame_0"
+					RayFrameCounter += 1
+				}
+			}
+			else if (Flap)
+			{
+				key = stringformat( ((Ray_Sprite_type == 0) ? "Mania_Boost_%d" : "Boost_frame_%d"), flapframes/4)
+				if (Ray_Sprite_type == 0 && flapframes == 5)
+				{
+					animationSpriteEx = ((level.framecounter >> 2) & 0x01) + 1
+					key = stringformat("Mania_Boost_%d", animationSpriteEx)
+				}
+
+				if (flapframes != 5)
+					++flapframes
+			}
+		}
+
+		timeattack.animSpriteEx = animationSpriteEx
+
+		if (key == 0)
+		{
+			if (character == CHARACTER_TAILS)
+			{
+				key = (Ray_Sprite_type == 0) ? stringformat("Mania_Ray_0x%02x", animationSprite) : stringformat("character_slot2_0x%02x", animationSprite)
+			}
+
+			if (!Renderer.hasCustomSprite(key))
+			{
+				u32 sourceBase    = (character == CHARACTER_SONIC) ? ((animationSprite >= 0xda) ? 0x140060 : 0x100000) : (character == CHARACTER_TAILS) ? ((animationSprite >= 0xd1) ? 0x143d00 : 0x3200e0) : 0x1200e0
+				u32 tableAddress  = (character == CHARACTER_SONIC) ? (super.active ? 0x148378 : 0x148182) : (character == CHARACTER_TAILS) ? 0x14a08a : 0x14bd0a
+				u32 mappingOffset = (character == CHARACTER_SONIC) ? (super.active ? 0x146816 : 0x146620) : (character == CHARACTER_TAILS) ? 0x148eb8 : 0x14a8d6		// Not really necessary here, we could also use "char.mapping_offset"
+
+				key = Renderer.setupCustomCharacterSprite(sourceBase, tableAddress, mappingOffset, animationSprite, 0x00)
+			}
+		}
+	}
+	else
+	{
+		if (Game.getSetting(SETTING_SMOOTH_ROTATION))
+		{
+			// Tails' tails
+			if (animationSprite >= 0x05 && animationSprite <= 0x14)
+			{
+				animationSprite = 0x05 + (animationSprite - 0x05) % 4
+				angle = lookupAngleByVector(s16[characterAddress + 0x18], s16[characterAddress + 0x1a])
+
+				flags = 0
+				if (objA0.flags2a & 0x01)
+				{
+					flags |= SPRITE_FLAG_FLIP_X
+					angle += 0x80
+				}
+				if (global.inv_gravity)
+				{
+					flags ^= SPRITE_FLAG_FLIP_Y
+					angle = -angle
+				}
+			}
+		}
+		if (TurnOffRayTail && char.state == 0x01 && !eggmobile_LBZ2)
+			return true
+		else
+		{
+			if (RayLookingUpFrameCounter > 14 || RayLookingDownFrameCounter != 0)
+				key = "Nothing"
+			else
+				key = stringformat((Ray_Sprite_type == 0) ? "character_Mania_tails_0x%02x" : "character_slot2_tails_0x%02x", animationSprite)
+		}
+
+		if (!Renderer.hasCustomSprite(key))
+		{
+			key = Renderer.setupCustomCharacterSprite(0x336620, 0x344d74, 0x344bb8, animationSprite, 0x00)
+		}
+	}
+
+	if (char.state == char.state.TRANSFORMING)
+	{
+		if (Ray_Transform_Fall)
+			SuperFall = true
+		else
+			Should_fall_anim = true
+	}
+
+	if (Ray_Twirl_Fall != 1 && (char.state == 0x31 || Fall_Anim_Corkscrew) && (char.flags & char.flag.IN_AIR))
+	{
+		Should_fall_anim = true
+	}
+
+	if (Ray_Twirl_Fall == 1 && (char.state.former == char.state.STRAIGHTJUMP && char.state == char.state.RUNNING) || (Ray_Uncurled_Fall == 1 && char.state.former == char.state.STRAIGHTJUMP && char.state == char.state.RUNNING))
+		FreeFall = 1
+
+	bool chars_run = (char.state == char.state.RUNNING && Ray_Uncurled_Fall == 1 && (char.animation.sprite < 0x31))
+	bool chars_run_alt = (char.state == char.state.RUNNING && (char.animation.sprite < 0x31))
+	bool After_Transforming = (Ray_Transform_Fall && (char.state == char.state.RUNNING) && char.velocity.y >= 0 && SuperFall)
+	bool After_A_Spring_Twirl = (chars_run_alt && Ray_Twirl_Fall == 1 && (FreeFall == 1 || Fall_Anim_Corkscrew) && char.velocity.y >= 0)
+	bool Level_Transitions = (Ray_Level_Transition_Fall == 1 && FreeFall == 1 && !Should_fall_anim)
+	bool chars_states = (char.state == char.state.STANDING || char.state == char.state.LOOKING_UP || char.state == char.state.COWERING)
+	bool While_Uncurled = (Ray_Uncurled_Fall == 1 && !Should_fall_anim && ((chars_run || chars_states || char.state == char.state.FALLING_PANIC) && (char.flags & char.flag.IN_AIR) && (FreeFall || char.velocity.y >= 282) && char.protection_flag == 0 && !eggmobile_LBZ2 && char.spindash != 0x80))
+	bool End_of_Level_Falling_Fix = (Ray_Level_Transition_Fall == 1 && Force_Fall)
+
+	if (char.state == 0x31)
+	{
+		// Mania = 2			   Sonic 3 = 8
+		if (char.animation.timer > ((Ray_Sprite_type == 0) ? 2 : 8))
+		{
+			char.animation.timer = ((Ray_Sprite_type == 0) ? 2 : 8)
+		}
+		if (char.animation.timer == 0)
+		{
+			char.animation.timer = ((Ray_Sprite_type == 0) ? 2 : 8)
+			++char.animation.frame
+		}
+		if (char.velocity.y >= 0)
+		{
+			FreeFall = 1
+			char.state = char.state.RUNNING
+			char.animation.frame = 0
+		}
+		// Mania = 10			   Sonic 3 = 5
+		if (char.animation.frame >= ((Ray_Sprite_type == 0) ? 10 : 5))
+		{
+			char.animation.frame = 0
+		}
+		key = (Ray_Sprite_type == 0) ? stringformat("mania_ray_springtwirl_%d", char.animation.frame) : stringformat("s3ray_springtwirl_%d", char.animation.frame)
+		// Mania = 2			   Sonic 3 = 6
+		if (char.animation.timer > ((Ray_Sprite_type == 0) ? 2 : 6))
+		{
+			char.animation.timer = ((Ray_Sprite_type == 0) ? 2 : 6)
+		}
+	}
+	
+	if (tails.carrying == 1 || char.state == char.state.HANGING || ((char.control_flags & 0x01) && !Ray_ShowFall) || char.state == char.state.DIED || (char.flags & char.flag.ON_OBJECT) || char.rotation.x != 0 || char.base_state == 0x04 || char.base_state == 0x06 || (char.state >= 0x20 && char.state <= 0x28))
+	{
+		SuperFall = false
+		FreeFall = 0
+	}
+	else if ( (char.state != char.state.ROLLING && (After_Transforming || After_A_Spring_Twirl || Level_Transitions || While_Uncurled)) || End_of_Level_Falling_Fix)
+	{
+		if (While_Uncurled)
+			TurnOffRayTail = true
+		key = (Ray_Sprite_type == 0) ? "Falling_Mania" : "Falling"
+	}
+
+	if (Ray_Sprite_type == 0)
+	{
+		if ((animationSprite >= 0xc3) && (animationSprite <= 0xc4)) // looking up
+		{
+			RayLookingDownFrameCounter = 0
+			if (RayLookingUpFrameCounter < 15)
+			{
+				key = stringformat("Ray_Looking_up_%d", RayLookingUpFrameCounter/3)
+				++RayLookingUpFrameCounter
+			}
+			else if (RayLookingUpFrameCounter >= 15)
+			{
+				RayLookingUpFrameCounter = 16
+				key = "Ray_Looking_up_4"
+			}				
+		}
+		else if ((animationSprite >= 0x9b) && (animationSprite <= 0x9c)) // ducking
+		{
+			RayLookingUpFrameCounter = 0
+			if (RayLookingDownFrameCounter < 8)
+			{
+				key = stringformat("Ray_Looking_down_%d", RayLookingDownFrameCounter/2)
+				++RayLookingDownFrameCounter
+			}
+			else if (RayLookingDownFrameCounter >= 8)
+			{
+				RayLookingDownFrameCounter = 8
+				key = "Ray_Looking_down_3"
+			}		
+		}
+		else if (char.state == char.state.STANDING)
+		{
+			if (RayLookingUpFrameCounter >= 16 && RayLookingUpFrameCounter <= 27)
+			{
+				key = stringformat("Ray_Looking_up_%d", RayLookingUpFrameCounter/4)
+				++RayLookingUpFrameCounter
+			}
+			else if (RayLookingDownFrameCounter >= 4)
+			{
+				key = "Ray_Looking_down_1"
+				RayLookingDownFrameCounter -= 4
+			}
+			else
+			{
+				RayLookingUpFrameCounter = 0
+				RayLookingDownFrameCounter = 0
+			}
+		}
+		else
+		{
+			if (char.state != 0x01)
+				RayLookingUpFrameCounter = 0
+			RayLookingDownFrameCounter = 0
+		}
+	}
+
+	// animation fix for SSZ
+	if ((objA0.animation.sprite == 0xe5 || objA0.animation.sprite == 0xe9) && global.zone_act == 0x0a00)
+	{
+		py += 3
+	}
+
+	u16 renderQueue = 0xa000 - char.sprite_priority
+	u8 atex = (char.sprite_attributes >> 9) & 0x30
+	if (EXTENDED_CHARACTER_PALETTES)
+		atex = 0x40 + character * 0x20
+
+	if (char.sprite_attributes & 0x8000)
+		flags |= SPRITE_FLAG_PRIO
+
+	if (rotationMode != 0 && global.inv_gravity)
+	{
+		// Correction for inverse gravity
+		angle = 128 - angle
+		flags ^= SPRITE_FLAG_FLIP_X
+	}
+
+	if ((char.state == 0x34 || char.state == 0x35) && global.zone == 0x05)
+	{
+		py -= 2
+
+		key = stringformat((Ray_Sprite_type) ? "Frosty_Ray_%d" : "Chilled_Ray_%d", (char.state == 0x35) ? 1 : 0)
+
+		if Renderer.hasCustomSprite(key)
+        {
+            Renderer.drawCustomSprite(key, px, py, atex, 0, renderQueue)
+            return true
+        }
+	}
+
+	// Render character
+	if (asSmallGhost)
+	{
+		Renderer.drawCustomSprite(key, px, py, atex, flags | SPRITE_FLAG_PRIO, 0xa800, angle, 0xc0ffffff, 0x8000)
+	}
+	else
+	{
+		Renderer.drawCustomSprite(key, px, py, atex, flags, renderQueue, angle, 255)
+	}
+
+	bool useAfterImages
+	if (isPlayer1)
+	{
+		if ((super.active == 0xff) || (super.active.tails == 0xff))
+		{
+			useAfterImages = true
+		}
+		else
+		{
+			if (Game.getSetting(SETTING_SPEEDUP_AFTERIMGS))
+			{
+				useAfterImages = ((u8[characterAddress + 0x2b] & char.bonus.SPEED_UP) != 0)
+			}
+		}
+	}
+
+	if (useAfterImages)
+	{
+		s16 afterImagesOffsetX = 0
+
+		for (s8 i = 3; i > 0; --i)
+		{
+			A1 = 0xffffe500 + u8(posbackup.offset.player1 - (i * 8 + 4))
+			s16 px0 = u16[A1] - camera.foreground.x.u16 + (i * afterImagesOffsetX / 4)
+			s16 py0 = u16[A1+2] - camera.foreground.y.u16
+			Renderer.drawCustomSprite(key, px0, py0, atex, flags, renderQueue - i, angle, 192 - i * 32)
+		}
+	}
+
+	// Prevent emulator-like rendering
+	return true
+}
+
+// Origins SSZ parity mod compatibility 
+function void XtraClawcords()
+{
+    if (XtraChar == 2)
+    {
+        if ((u8[0xfffffab8] & 0x20) == 0)
+        {
+            A1 = 0xffffb000
+            objA1.position.x.u16 -= 3
+            objA1.position.y.u16 -= 6
+        }
+        return
+    }
+    base.XtraClawcords()
+}
+
+function void XtraInClaw()
+{
+	if (XtraChar == 2)
+	{
+		u8[A1 + 0x20] = char.state.LIFTED
+		objA1.animation.sprite = 0xc9
+		return
+	}
+	base.XtraInClaw()
+}
+
+function void XtraEscape()
+{
+	if (XtraChar == 2)
+	{
+		A1 = 0xffffb000
+		// objA0.position.x.u16 = objA1.position.x.u16
+		// objA0.position.y.u16 = objA1.position.y.u16
+		// objA0.velocity.x = 0x0400
+		objA0.velocity.y = 0x1e0
+		
+		u8[A1 + 0x20] = char.state.BALANCING2
+
+		glideDirection = GLIDE_DOWN
+		Audio.playAudio("glide_down", AudioContext.CONTEXT_SOUND)
+		objA1.animation.sprite = 0xc7
+		return
+	}
+	base.XtraEscape()
+}
+
+function bool XtraOnGround()
+{
+	if (XtraChar == 2)
+	{
+		Raybreaksout()
+		return true
+	}
+	return base.XtraOnGround()
+}
+function void Raybreaksout()
+{
+
+	UpdateMovementStraightSimple()
+	A1 = 0xffffb000
+	objA1.position.x.u16 = objA0.position.x.u16
+	objA1.position.y.u16 = objA0.position.y.u16
+	D0.u16 = objA0.position.x.u16
+
+	CheckGroundCollision()
+	if (D1.u16 <= 14)
+	{
+		u8[0xffffb000 + 0x2e] = 0
+		StopObjectA1()
+		
+		u16[0xffffb000 + 0x14] = 0x4ac
+		s16[0xffffb000 + 0x1c] = objA0.velocity.x
+		u8[0xffffb000 + 0x20] = char.state.RUNNING
+		objA0.velocity.y = 0
+		u8[0xffffb000 + 0x1e] = 0x13
+		player1.control_override = 0xff // Disable P1's controls
+		control.player1 = 0x0808
+	}
+	else
+	{
+		u8[0xffffb000 + 0x22] = RayGlide_Direction()
+	}
+	if (D0.u16 < level.bossarea.right)
+		return
+		
+	
+	player1.control_override = 0
+
+	s16[0xffffb000 + 0x1c] = 0
+
+	objA0.update_address = 0x07ccb0
+	objA0.countdown_value = 0x06
+	objA0.velocity.x = 0
+	objA0.velocity.y = 0
+	objA0.hitbox_extends.y = 0x13
+}

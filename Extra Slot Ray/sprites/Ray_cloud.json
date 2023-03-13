@@ -1,0 +1,7 @@
+{
+	"Ray_cloud_0":  { "File": "Ray_cloud.bmp", "Rect": "0,0,14,11", "Center": "8,8" },
+	"Ray_cloud_1":  { "File": "Ray_cloud.bmp", "Rect": "16,0,29,19", "Center": "8,8" },
+	"Ray_cloud_2":  { "File": "Ray_cloud.bmp", "Rect": "55,0,37,26", "Center": "8,8" },
+	"Ray_cloud_3":  { "File": "Ray_cloud.bmp", "Rect": "97,0,39,28", "Center": "8,8" },
+	"Ray_cloud_4":  { "File": "Ray_cloud.bmp", "Rect": "138,0,38,26", "Center": "8,8" }
+}

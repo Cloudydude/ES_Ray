@@ -1,0 +1,10 @@
+{
+	"bump_slot2_0x00":  { "File": "bumper_ray.png", "Rect": "0,0,16,16", "Center": "8,8" },
+	"bump_slot2_0x01":  { "File": "bumper_ray.png", "Rect": "24,0,16,16", "Center": "8,8" },
+	"bump_slot2_0x02":  { "File": "bumper_ray.png", "Rect": "48,0,16,16", "Center": "8,8" },
+	"bump_slot2_0x03":  { "File": "bumper_ray.png", "Rect": "72,0,16,16", "Center": "8,8" },
+	"bump_slot2_0x04":  { "File": "bumper_ray.png", "Rect": "96,0,16,16", "Center": "8,8" },
+	"bump_slot2_0x05":  { "File": "bumper_ray.png", "Rect": "120,0,16,16", "Center": "8,8" },
+	"bump_slot2_0x06":  { "File": "bumper_ray.png", "Rect": "144,0,16,16", "Center": "8,8" },
+	"bump_slot2_0x07":  { "File": "bumper_ray.png", "Rect": "168,0,16,16", "Center": "8,8" }
+}

@@ -1,0 +1,129 @@
+// Forcibly load Ray's Blue Sphere palette when 2P Tails object loads
+//# address-hook(0x009212) end(0x009274)
+function void fn009212()
+{
+	if ((global.characters != CHARS_TAILS_ALONE) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ))
+	{
+		base.fn009212()
+		
+		u64 paletteKey = stringformat("slot2palette_bluesphere_0%d", Ray_Pal)
+		u16 numColors = System.loadExternalPaletteData(paletteKey, 0, 0x800000, 0x20)
+		if (numColors > 0)
+		{
+			u32 dest = 0x802180 + CHARACTER_TAILS * 0x40
+			for (u16 i = 0; i < numColors; ++i)
+			{
+				u16[dest + i * 2] = packColor(u32[0x800000 + i * 4])
+
+				if (Ray_shoe_color == 0)
+				{
+					if (Ray_Pal == 6)
+					{
+						u16[dest + 2 * 12] = 0x0526
+						u16[dest + 2 * 13] = 0x0402
+						u16[dest + 2 * 14] = 0x034D
+					}
+					else
+					{
+						// u16[dest + 2 * 10] = 0x008c
+						u16[dest + 2 * 12] = 0x000e
+						u16[dest + 2 * 13] = 0x0008
+						u16[dest + 2 * 14] = 0x064e
+					}
+				}
+
+				if (Rays_Grays == 1 && (Ray_Pal == 1 || Ray_Pal == 2 || Ray_Pal == 6 || Ray_Pal == 9))
+				{
+					u16[dest + 2 * 4] = 0x0ecc
+					u16[dest + 2 * 5] = 0x0866
+					u16[dest + 2 * 15] = 0x0caa
+				}
+			}
+		}
+	}
+	else
+	{
+		base.fn009212()
+		return
+	}
+}
+
+
+// Don't show tail during some animations, and reduce animation length to 12 frames
+//# address-hook(0x009488) end(0x0094d2)
+function void fn009488()
+{
+	if (XtraChar == 2 || ((global.characters != CHARS_TAILS_ALONE) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) )))
+	{
+		A1 = 0xffff0000 + objA0.value3e
+		objA0.position.x.u16 = objA1.position.x.u16
+		objA0.position.y.u16 = objA1.position.y.u16
+
+		D0.u16 = (Ray_Sprite_type == 0) ? 0x2aaa : 0x212B
+		D1.s16 = bluespheres.movement_speed
+		if (D1.s16 >= 0)
+		{
+			D0.u16 += D1.s16
+		}
+
+		u32 result = u32(u16[A0 + 0x24]) + u32(D0.u16)
+		u16[A0 + 0x24] = u16(result)
+		if (result & 0x10000)	// Carry flag check
+		{
+			++objA0.animation.sprite
+			if (objA0.animation.sprite >= ((Ray_Sprite_type == 0) ? 13 : 9))
+			{
+				objA0.animation.sprite = 1
+			}
+		}
+		
+		// Don't display during a jump
+		if (objA1.animation.sprite >= 2 && objA1.animation.sprite <= 8)
+		{
+			DrawObject()
+		}
+
+		A2 = 0x291106
+		D6 = 0x2909e8
+		D4.u16 = 0xf600
+		fn0091a2()
+	}
+	else
+		base.fn009488()
+}
+
+// Load Ray's tail in the extra mode version of blue spheres, please
+//# address-hook(0x008faa) end(0x009038)
+function void fn008faa()
+{
+	base.fn008faa()
+	if (XtraChar == 2)
+	{
+		objA0.mapping_offset = 0x2908ba
+		objA0.sprite_attributes = (sprite_attribute.PRIORITY | sprite_attribute.PALETTE.LINE1 | (SpecialStage.Tails.targetInVRAM >> 5))
+
+		fn008d5c()
+		if (_equal())
+		{
+			// Spawn tails object
+			objA1.update_address = 0x009444
+			u16[A1 + 0x3e] = A0.u16
+		}
+	}
+}
+
+//Ray during the winning screen in the extra mode version of blue spheres
+//# address-hook(0x04df86) end(0x04dfe8)
+function void fn04df86()
+{
+	base.fn04df86()
+	if (XtraChar == 2)
+	{
+		objA0.mapping_offset = 0x148eb8
+		objA0.state = char.state.WIN_POSE
+		objA0.sprite_attributes = (sprite_attribute.PRIORITY | (Char.Tails.targetInVRAM >> 5))
+
+		objA0.update_address = 0x04dffe
+		fn04dffe()
+	}
+}

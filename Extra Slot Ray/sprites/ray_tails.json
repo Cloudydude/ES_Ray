@@ -1,0 +1,53 @@
+{
+	"character_slot2_tails_0x01":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "20,15" },
+	"character_slot2_tails_0x02":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "20,15" },
+	"character_slot2_tails_0x03":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "20,15" },
+	"character_slot2_tails_0x04":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "20,15" },
+	"character_slot2_tails_0x05":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "20,15" },
+	"character_slot2_tails_0x06":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "36,8" },
+	"character_slot2_tails_0x07":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "36,8" },
+	"character_slot2_tails_0x08":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "36,8" },
+	"character_slot2_tails_0x09":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "31,-7" },
+	"character_slot2_tails_0x0a":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "31,-7" },
+	"character_slot2_tails_0x0b":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "31,-7" },
+	"character_slot2_tails_0x0c":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "31,-7" },
+	"character_slot2_tails_0x0d":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "8,-12" },
+	"character_slot2_tails_0x0e":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "8,-12" },
+	"character_slot2_tails_0x0f":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "8,-12" },
+	"character_slot2_tails_0x10":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "8,-12" },
+	"character_slot2_tails_0x11":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "-7,-7" },
+	"character_slot2_tails_0x12":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "-7,-7" },
+	"character_slot2_tails_0x13":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "-7,-7" },
+	"character_slot2_tails_0x14":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "-7,-7" },
+	"character_slot2_tails_0x1a":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "29,2" },
+	"character_slot2_tails_0x1b":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "20,15" },
+	"character_slot2_tails_0x1c":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "29,2" },
+	"character_slot2_tails_0x1d":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "29,2" },
+	"character_slot2_tails_0x1e":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "20,15" },
+	"character_slot2_tails_0x1f":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "29,3" },
+	"character_slot2_tails_0x20":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "29,3" },
+	"character_slot2_tails_0x21":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "20,15" },
+	"character_slot2_tails_0x22":  { "File": "character_ray.bmp", "Rect": "1,25,21,29", "Center": "20,12" },
+
+	// Used
+
+	// S3 Ray
+	"character_slot2_tails_0x23":  { "File": "character_ray.bmp", "Rect": "513,17,21,29", "Center": "22,11" },
+	"character_slot2_tails_0x24":  { "File": "character_ray.bmp", "Rect": "571,17,19,29", "Center": "20,11" },
+	"character_slot2_tails_0x25":  { "File": "character_ray.bmp", "Rect": "626,17,20,29", "Center": "21,11" },
+	"character_slot2_tails_0x26":  { "File": "character_ray.bmp", "Rect": "456,17,22,29", "Center": "23,11" },
+
+	// Mania Ray
+	"character_Mania_tails_0x22":  { "File": "Rayven.bmp", "Rect": "175,764,16,32", "Center": "19,19" },
+	"character_Mania_tails_0x23":  { "File": "Rayven.bmp", "Rect": "175,803,16,32", "Center": "19,19" },
+	"character_Mania_tails_0x24":  { "File": "Rayven.bmp", "Rect": "208,803,16,32", "Center": "20,19" },
+	"character_Mania_tails_0x25":  { "File": "Rayven.bmp", "Rect": "242,803,16,32", "Center": "20,19" },
+	"character_Mania_tails_0x26":  { "File": "Rayven.bmp", "Rect": "276,803,16,32", "Center": "20,19" },
+
+	"character_slot2_tails_0x27":  { "File": "character_ray.bmp", "Rect": "68,3,11,7", "Center": "18,-3" },
+	"character_slot2_tails_0x28":  { "File": "character_ray.bmp", "Rect": "115,2,5,16", "Center": "15,0" },
+	"character_slot2_tails_0x29":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "20,15" },
+	"character_slot2_tails_0x2a":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "20,15" },
+	"character_slot2_tails_0x2b":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "20,15" },
+	"character_slot2_tails_0x2c":  { "File": "character_ray.bmp", "Rect": "1,1,1,1", "Center": "20,15" }
+}

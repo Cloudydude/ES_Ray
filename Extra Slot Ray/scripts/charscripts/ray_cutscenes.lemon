@@ -1,0 +1,460 @@
+// Fix camera placement with larger Tails hitbox for all walk-in zone transitions
+//# address-hook(0x044a26) end(0x044a62)
+function void fn044a26()
+{
+	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[0xffffb038] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) )
+	{
+		player1.control_override = 1
+		control.player1 = 0x0800
+		u8[0xfffff676] = 1			// Forces camera to a certain position
+		u16[0xfffff678] = u16[A0 + 0x30]
+		u16[0xfffff67c] = objA0.value32
+		
+		if (u8[0xffffb038] == CHARACTER_TAILS)
+		{
+			u16[0xfffff67c] -= 0x0004	// This is not the best way to do this but I can't be bothered to find where objA0.value32 is being set
+		}
+		
+		// DA Garden
+		if (Renderer.hasCustomSprite("obj_dark_sand_pit_overlay_shallow184"))
+			u16[0xffffb01c] = 0x0680	// set player to usual max ground speed
+
+		D0.u16 = u16[0xffffb010] + 0x10
+		if (D0.u16 < u16[A0 + 0x30])
+			return
+
+		player1.control_override = 0
+		player2.control_override = 0
+		UnloadObject()
+	}
+	else
+	{
+		base.fn044a26()
+		return
+	}
+}
+
+
+// LBZ2 Eggmobile cutscene
+//# address-hook(0x08d53e) end(0x08d556)
+function void fn08d53e()
+{
+	base.fn08d53e()
+	if (XtraChar == 2)
+	{
+		A1 = 0xffffb000
+		D0 = u8[A1 + 0x38]
+		if (u8[A1 + 0x22] == 173)
+			u8[A1 + 0x22] = 186
+		UpdatePlayer1SpritePatterns()
+	}
+}
+
+// Super Emeralds cutscene in HPZ
+function void fn090eae()
+{
+	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[A1 + 0x38] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	{
+		D0 = u8[A1 + 0x38]
+		u8[0x090bcb] = u8[0x090bca]
+		u8[0x090dd9] = u8[0x090dd8]
+		u8[0x090f07] = u8[0x090f06]
+		u8[0x090bcf] = u8[0x090bce]
+		u8[A1 + 0x22] = u8[0x090f06 + D0.s16]
+		u8[A1 + 0x20] = 5
+		fn085fc4()
+	}
+	else
+	{
+		base.fn090eae()
+		return
+	}
+}
+
+
+// MHZ2 Knuckles cutscene
+//# address-hook(0x065e72)
+function void fn065e72()
+{
+	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[A1 + 0x38] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) )
+	{
+		u8[A1 + 0x20] = 0x05
+		if (objA0.animation.frame >= 0x0c)
+		{
+			u8[A1 + 0x04] |= render_flag.FLIP_Y
+			u8[A1 + 0x20] = 0
+			u8[A1 + 0x2e] = 0x83
+
+			D0 = (global.framecounter & 0x02) ? 2 : 0
+			//D0.u8 += u8[A1 + 0x38]
+			u8[A1 + 0x22] = u8[0x065eb0 + D0.s16]
+
+			fn085fc4()
+		}
+	}
+	else
+	{
+		base.fn065e72()
+		return
+	}
+}
+
+
+// HPZ Master Emerald theivery cutscene
+//# address-hook(0x064ca6) end(0x064d14)
+function void fn064ca6()
+{
+	base.fn064ca6()
+	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[0xffffb038] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) )
+	{
+		A1 = 0xffffb000
+		if (u8[A1 + 0x20] == char.state.LOOKING_UP)
+			objA1.animation.sprite = 0xc4
+			//objA1.animation.sprite = 0xc4
+	}
+}
+
+
+// DEZ Act transition + ending sequence
+//# address-hook(0x05fd88) end(0x05fd9a)
+function void fn05fd88()
+{
+	if (XtraChar != 2 || global.characters != CHARS_TAILS_ALONE)
+	{
+		base.fn05fd88()
+		return
+	}
+	
+	A1 = 0xffffb000
+	D0.u16 = global.characters & 0x03
+	
+	if (u8[A1 + 0x38] == CHARACTER_TAILS)
+	{
+		D0.u16 = 0
+	}
+	
+	u8[A1 + 0x22] = u8[0x05fda0 + D0.s16]
+	UpdatePlayer1SpritePatterns()
+}
+
+
+// Another DEZ Act transition fix
+//# address-hook(0x07e44c) end(0x07e4a0)
+function void fn07e44c()
+{
+	if (XtraChar != 2 || u8[0xffffb038] != CHARACTER_TAILS)
+	{
+		base.fn07e44c()
+		return
+	}
+	
+	UpdateMovementSimple()
+	if (objA0.velocity.y >= 0)
+	{
+		D0.u16 = /*(global.characters != CHARS_TAILS_ALONE) ?*/ 0x03ac //: 0x03b0
+		if (objA0.position.y.u16 >= D0.u16)
+		{
+			objA0.position.y.u16 = D0.u16
+			objA0.update_address = 0x07e4a2
+			objA0.countdown_value = 119
+
+			if (allocDynamicObjectStd())
+			{
+				// Show title card for act 2
+				objA1.update_address = 0x02d690
+				u8[A1 + 0x3e] = 0xff
+			}
+		}
+	}
+
+	A1 = 0xffffb000
+	objA1.position.x.u16 = objA0.position.x.u16
+	objA1.position.y.u16 = objA0.position.y.u16
+}
+
+
+// DEZ "Act 3" intro cutscene
+//# address-hook(0x07fe06) end(0x07fe2a)
+function void fn07fe06()
+{
+	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[A1 + 0x38] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	{
+		u8[A1 + 0x38] = 0x00
+		base.fn07fe06()
+		u8[A1 + 0x38] = 0x01
+	}
+	else
+	{
+		base.fn07fe06()
+		return
+	}
+}
+
+// Fix for Ray's hyper palette during the ending where he's falling
+//# address-hook(0x05d8bc) end(0x05d9e8)
+function void fn05d8bc()
+{
+	if (XtraChar != 2)
+	{
+		base.fn05d8bc()
+		return
+	}
+	setupObjectAttributesFull(0x0600da)
+
+	objA0.render_flags &= ~0x04
+	objA0.base_state = 0x02
+	fn05fe82()
+
+	player1.camera_lock = 0xff
+	u8[0xfffffab8] = 0
+
+	A1 = 0xffffb000
+	u8[A1 + 0x04] &= ~0x04
+	u8[A1 + 0x0a] |= 0x80
+	u16[A1 + 0x1c] = 0x0800
+	objA1.state = char.state.LIFTED
+	u8[A1 + 0x2a] = 0
+	u8[A1 + 0x2e] = 0x81
+
+	u32[0xffffb04a] = 0
+	super.ring_dec.frames = 0x7fff
+	hud.dirty.timer = 0x01
+
+	if (outro.ending_type >= 0)
+	{
+		if (outro.ending_type == 0)
+		{
+			if (isMainCharacter(CHARACTER_SONIC))
+			{
+				fn05fc8e()
+				if (allocDynamicObjectStd())
+				{
+					objA1.update_address = 0x05fdd4
+				}
+
+				// Change Sonic's colors back to white
+			#if STANDALONE
+				if (EXTENDED_CHARACTER_PALETTES)
+				{
+					fillMemory_u16(0x802004, 6, 0x0eee)
+				}
+				else
+			#endif
+				{
+					u16[0xfffffc04] = 0x0eee
+					u16[0xfffffc06] = 0x0eee
+					u16[0xfffffc08] = 0x0eee
+				}
+			}
+		}
+		else
+		{
+			u8[0xffffb020] = 0
+			fn05fcce()
+
+			// Change Sonic's colors back to white
+		#if STANDALONE
+			if (EXTENDED_CHARACTER_PALETTES)
+			{
+				fillMemory_u16(0x802004, 6, 0x0eee)
+			}
+			else
+		#endif
+			{
+				u16[0xfffffc04] = 0x0eee
+				u16[0xfffffc06] = 0x0eee
+				u16[0xfffffc08] = 0x0eee
+			}
+		}
+	}
+
+	objA0.position.x.u16 = 0x0100 + getScreenExtend()
+	objA0.position.y.u16 = 0xe0
+
+	// Spawn the Tornado
+	A1 = 0xffffb250
+	u16[A0 + 0x44] = A1.u16
+	objA1.update_address = 0x05ea52
+	u8[A1 + 0x2c] = 0xff
+	u8[A1 + 0x38] |= 0x04
+	u16[A1 + 0x46] = A0.u16
+
+	// Spawn the Master Emerald
+	A1 = 0xffffbde0
+	objA1.update_address = 0x05de60
+	u16[A1 + 0x46] = A0.u16
+	objA1.position.x.u16 = 0x011e + getScreenExtend()
+	objA1.position.y.u16 = 0xcf
+
+	copyMemory(0xfffffcc0, 0x0a97bc, 0x20)
+
+	Kosinski.addToDMAQueue(0x17fcba, 0xa5c0)
+	Kosinski.addToDMAQueue(0x163418, 0x3c60)
+	Kosinski.addToDMAQueue(0x162914, 0x4dc0)
+
+#if STANDALONE
+	Game.startSkippableCutscene()
+
+	if (Game.isNormalGame())
+		Game.setAchievementComplete(ACHIEVEMENT_LONGPLAY)
+#endif
+}
+
+
+// Another ending sequence fix
+//# address-hook(0x05da74) end(0x05db28)
+function void fn05da74()
+{
+	if (XtraChar != 2 || global.characters != CHARS_TAILS_ALONE)
+	{
+		base.fn05da74()
+		return
+	}
+	
+	A1 = 0xffff0000 + u16[A0 + 0x44]
+	D0.u16 = objA1.position.x.u16 + 0x20
+	if (D0.s16 <= s16(objA0.position.x.u16))
+	{
+		D0 = u32[0xffffee9c] + 0x8000
+		u32[0xffffee9c] = D0
+		return
+	}
+
+	objA0.base_state = 0x08
+	u8[0xfffffab8] |= 0x01
+	objA0.countdown_value = 0x20
+
+	D0 = -0x20
+	u8[A1 + 0x42] = D0.u8
+	D1.u16 = objA1.position.x.u16
+	D1.u16 -= D0.u16
+	objA0.position.x.u16 = D1.u16
+
+	D0 = 0x2b
+	if (global.characters == CHARS_TAILS_ALONE)
+	{
+		//D0.u8 -= 4
+		u8[0xffffcc0e] &= ~0x04
+	}
+	u8[A1 + 0x43] = D0.u8
+	D1.u16 = objA1.position.y.u16
+	D0.s16 = -D0.s16
+	D1.u16 += D0.u16
+	objA0.position.y.u16 = D1.u16
+	u16[A0 + 0x3a] = D1.u16
+
+	A1 = 0xffffb000
+	if (outro.ending_type > 0)
+	{
+		super.active = 0
+		super.active.tails = 0
+		super.palettefx.state = 2
+		super.palettefx.frame = 30
+		
+		// Idk what this is doing exactly but the general pattern here would indicate it should be removed
+		u32[A1 + 0x0c] = /*(global.characters != CHARS_TAILS_ALONE) ?*/ 0x146620 //: 0x148eb8
+	}
+
+	u8[A1 + 0x20] = 0x05
+	u8[A1 + 0x2e] = 0x83
+	fn05fd88()
+	fn05db2c()
+}
+
+// Ending where Ray turns super/hyper and jumps off the plane
+//# address-hook(0x08648c) end(0x08653e)
+function void fn08648c()
+{
+	if (XtraChar != 2)
+	{
+		base.fn08648c()
+		return
+	}
+
+	ring_counter += 50
+	super.palettefx.state = 1
+	super.palettefx.timer = 0x0f
+	super.active = 1
+	super.ring_dec.frames = 60
+	global.move.speedcap = 0x800
+	global.move.acceleration = 0x18
+	global.move.deceleration = 0xc0
+	u8[0xffffb000 + 0x20] = char.state.TRANSFORMING
+
+
+	u32[0xffffb000 + 0x0c] = 0x146816
+	super.active = 0xff
+#if STANDALONE
+	super.active = (global.super_emeralds == 7) ? 0xff : 0x01
+#endif
+	global.move.speedcap = 0xa00
+	global.move.acceleration = 0x30
+	global.move.deceleration = 0x100
+
+	u8[0xffffb000 + 0x2b] |= char.bonus.INVINCIBLE
+	u8[0xffffb000 + 0x2e] = 0x81
+	u8[0xffffb000 + 0x35] = 0
+}
+
+
+//Ending fix for Ray so that his super/hyper palette works during the ending
+//# address-hook(0x05e4e2) end(0x05e4fe)
+function void fn05e4e2()
+{
+	if (XtraChar != 2)
+	{
+		base.fn05e4e2()
+		return
+	}
+
+	if ((u8[0xfffffab8] & 0x08) == 0)
+	{
+		DrawObject()
+	}
+	else
+	{
+		Object.TriggerUnloading()
+	}
+}
+
+
+// Credits
+//# address-hook(0x05ea74) end(0x05ead6)
+function void fn05ea74()
+{
+	if (XtraChar != 2 || global.characters != CHARS_TAILS_ALONE)
+	{
+		base.fn05ea74()
+		return
+	}
+	
+	setupObjectAttributesFull(0x0600ce)
+
+	if (objA0.flags38 & 0x04)
+	{
+		objA0.flags38 &= ~0x04
+		objA0.render_flags &= ~render_flag.WORLD
+	}
+
+	if (objA0.subtype2c != 0)
+	{
+		objA0.base_state = 0x04
+		objA0.position.x.u16 = 0x40
+		objA0.position.y.u16 = 0x010b
+		u16[A0 + 0x3a] = 0x010b
+		if (outro.ending_type >= 0)
+		{
+			spawnChildObjects(0x0601e8)
+		}
+	}
+
+	/*if (global.characters == CHARS_TAILS_ALONE)
+	{
+		u8[A0 + 0x43] -= 4
+	}*/
+
+	objA0.render_flags |= render_flag.COMPOUND
+	u16[A0 + 0x16] = 0x02
+
+	spawnChildObjects(0x0601c2)
+}

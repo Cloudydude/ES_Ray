@@ -1,0 +1,993 @@
+global u8 Ray_Partner
+global bool Ray_Boost
+global bool Ray.Elemental.Shields
+global bool RayBubbleBounce
+global u8 Ray_Shield_Button
+
+global bool IsUsingShield
+
+// This function is here so that any character mods of Tails don't conflict with Ray
+function void Character.updateJumpMoves()
+{
+	u8 input_state     = (char.character == CHARACTER_TAILS) ? control.tails.state   : control.player1.state
+	u8 input_pressed   = (char.character == CHARACTER_TAILS) ? control.tails.pressed : control.player1.pressed
+	bool isSuperActive = super.active
+
+	if (char.jumping)
+	{
+		if (XtraChar == 2 ||  (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ))
+		{
+			// Limit velocity.y
+			s16 max_vy = (char.flags & char.flag.UNDERWATER) ? -0x200 : -0x400
+			if (char.velocity.y < max_vy)
+			{
+				// Limit vertical velocity while not pressing any jump button
+				//  -> This is important to support low jumps by just tapping the button briefly
+				if ((input_state & CONTROL_ABC) == 0)
+				{
+					char.velocity.y = max_vy
+				}
+			}
+			else
+			{
+				if (char.double_jump_state == 0)
+				{
+					#if STANDALONE
+						if (Input.buttonPressed(BUTTON_Y) && !System.getGlobalVariableValueByName("original_mode"))
+						{
+							if (Mods.isModActive("Characters Go Super Then Hyper"))
+							{
+								if ((isSuperActive == 0xff) == 0 && char.invuln.countdown == 0)	// Check invulnerability to prevent spamming of super activate + cancel
+								{
+									if (global.chaos_emeralds >= 7 && global.traded_emeralds == 0 && super.active)
+									{
+										char.jumping = 0
+										return
+									}
+									else if (Character.performSuperTransformation())
+									{
+										char.jumping = 0
+										return
+									}
+								}
+							}
+							else if (!isSuperActive && char.invuln.countdown == 0)	// Check invulnerability to prevent spamming of super activate + cancel
+							{
+								if (Character.performSuperTransformation())
+									return
+							}
+						}
+					#endif
+
+					// Check if pressed jump again in mid-air
+					if (input_pressed & CONTROL_ABC)
+					{
+					#if STANDALONE
+						// Check for other things to do instead of the usual reaction to jump button pressed
+						if (onCharacterPressedJumpInMidAir(input_state, input_pressed))
+					#endif
+						{
+							if (Ray.Elemental.Shields && (input_pressed & Ray_Shield_Button && (char.bonus_effect & char.bonus.ANY_SHIELD) && (char.bonus_effect & char.bonus.INVINCIBLE) == 0))
+								RayShieldPressedJumpInMidAir()
+							else
+								TailsPressedJumpInMidAir()
+						}
+					}
+				}
+			}
+		}
+		else
+		{
+			base.Character.updateJumpMoves()
+			return
+		}
+	}
+	else
+	{
+		base.Character.updateJumpMoves()
+	}
+}
+
+function void RayShieldPressedJumpInMidAir()
+{
+	// Remove control lock
+	char.flags &= ~char.flag.CONTROL_LOCK
+
+	IsUsingShield = true
+
+	u8 sproing = System.getGlobalVariableValueByName("powerspringtimer_p1")
+	
+	if (char.bonus_effect & char.bonus.SHIELD_FIRE)
+	{
+		u8[0xffffcd08] = 1		// That's 0x20 inside the shield object at 0xffffcce8
+
+		sproing = max(sproing , 6)
+		System.setGlobalVariableValueByName("powerspringtimer_p1", sproing)
+		
+		char.double_jump_state = 1
+
+		s16 vx = 0x800
+		if (char.flags & char.flag.FACING_LEFT)
+			vx = -vx
+
+		char.velocity.x = vx
+		char.velocity.y = 0
+		char.groundspeed = vx
+		camera.locktime.player1 = 0x2000
+		ClearPositionBackup()
+		playSound(SFX_FIRESHIELDDASH)
+	}
+	else if (char.bonus_effect & char.bonus.SHIELD_LIGHTNING)
+	{
+		u8[0xffffcd08] = 1
+		char.double_jump_state = 1
+
+		sproing = max(sproing , 0)
+		System.setGlobalVariableValueByName("powerspringtimer_p1", sproing)
+
+		char.velocity.y = -0x580
+		char.jumping = 0
+		playSound(SFX_LIGHTNINGJUMP)
+	}
+	else if (char.bonus_effect & char.bonus.SHIELD_BUBBLE)
+	{
+		u8[0xffffcd08] = 1
+		RayBubbleBounce = true
+		char.double_jump_state = 1
+
+		sproing = max(sproing , 3)
+		System.setGlobalVariableValueByName("powerspringtimer_p1", sproing)
+
+	#if STANDALONE
+		if (!Game.getSetting(SETTING_BUBBLE_SHIELD_BOUNCE))
+	#endif
+		{
+			char.velocity.x = 0
+		}
+		char.velocity.y = 0x800
+		char.groundspeed = 0
+		playSound(SFX_BUBBLEBOUNCE)
+	}
+	else // Character must have a shield to call this function, so this must be classic shield
+	{
+		// We could put an ability here I guess. It would have to be optional.
+		char.double_jump_state = 1
+		playSound(0x3a)
+	}
+}
+
+#if STANDALONE
+function bool onCharacterPressedJumpInMidAir(u8 input_state, u8 input_pressed)
+{
+	if (XtraChar == 2 ||  (global.characters != CHARS_TAILS_ALONE && !isMainCharacter(CHARACTER_TAILS)) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ))
+	{
+		return onCharacterPressedJumpInMidAir_Ray(input_state, input_pressed)
+	}
+	return base.onCharacterPressedJumpInMidAir(input_state, input_pressed)
+}
+#endif
+
+function bool onCharacterPressedJumpInMidAir_Ray(u8 input_state, u8 input_pressed)
+{
+	// The following is only relevant for first player if having Tails as second character
+	if (A0 == 0xffffb000 && isSecondCharacter(CHARACTER_TAILS))
+	{
+		// Start Tails Assist flight?
+		if (Game.getSetting(SETTING_TAILS_ASSIST_MODE) != 0 && (input_state & CONTROL_UP))
+		{
+			// Tails must be AI controlled and not too far away
+			s16 dx = s16[0xffffb04a + 0x10] - s16[0xffffb000 + 0x10]
+			s16 dy = s16[0xffffb04a + 0x14] - s16[0xffffb000 + 0x14]
+			if (tails.control_counter == 0 && tails.ai_routine == 0x06 && abs(dx) < 0xc0 && abs(dy) < 0x80)
+			{
+				// Tails must not already be flying already, and ready for flying
+				bool startFlight = false
+				if (u8[0xffffb04a + 0x20] == char.state.ROLLING && u8[0xffffb04a + 0x40] == 1)	// char.jumping must be set
+				{
+					startFlight = true
+				}
+
+				// Alternatively, Tails can be standing or running and ready to jump
+				else if ((u8[0xffffb04a + 0x2a] & char.flag.IN_AIR) == 0)
+				{
+					A0 = 0xffffb04a
+					control.tails.pressed |= CONTROL_ABC
+					if (Character.CheckStartJump())
+					{
+						tails.ai_routine = 0x30		// No valid value in vanilla, but we're using it for the Tails Assist flight routine
+						tails_assist.trigger_countdown = 8	// Hold jump button for 8 frames before triggering flight
+					}
+					A0 = 0xffffb000
+				}
+
+				if (startFlight)
+				{
+					A0 = 0xffffb04a
+					TailsStartFlight()
+					char.velocity.y = max(char.velocity.y, -0x200)	// Limit Tails' velocity
+					tails.ai_routine = 0x30		// No valid value in vanilla, but we're using it for the Tails Assist flight routine
+					tails_assist.trigger_countdown = 0
+					tails.catch_timeout = 0
+					A0 = 0xffffb000
+
+					// No further reaction to jump button if:
+					//  - it would activate the fire or bubble shield
+					//  - Knuckles would start gliding
+					bool preventAction = false
+					if (isMainCharacter(CHARACTER_SONIC))
+					{
+						preventAction = (char.bonus_effect & (char.bonus.SHIELD_FIRE | char.bonus.SHIELD_BUBBLE)) != 0 && (char.bonus_effect & char.bonus.INVINCIBLE) == 0 && !super.active
+					}
+					else if (isMainCharacter(CHARACTER_KNUCKLES))
+					{
+						preventAction = (abs(char.velocity.x) < 0x100)
+					}
+					return !preventAction
+				}
+			}
+		}
+	}
+
+	// Use normal jump button reaction
+	return true
+}
+
+function void TailsStartFlight()
+{
+	if (XtraChar == 2 ||  (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ))
+	{
+		FreeFall = false
+		char.flags &= ~char.flag.ROLLING					// stop rolling
+		
+		char.state = char.state.BALANCING2					// repurpose 2nd balance state for gliding
+		
+		RayGlide_ChangeAnim(GLIDE_ANIM_TURN)
+
+		char.double_jump_state = 1							// set jump ability
+		glideSwoopTimer = 0xFF								// set swoop timer to max for first swoop
+
+		glideSwoopTarget = 0								// clear swoop target
+		glideSwoopAccel = 0									// clear swoop acceleration
+
+		glideSwoopCounterweight = GLIDE_INIT_COUNTERWEIGHT	// set initial swoop counterweight
+		
+
+		// check direction and input
+		if (char.flags & char.flag.FACING_LEFT)
+		{
+			// facing left
+			if (control.tails.state & CONTROL_LEFT)
+			{
+				RayInitGlide_PressedForDown()
+			}
+			else
+			{
+				RayInitGlide_PressedForUp()
+			}
+		}
+		else
+		{
+			// facing right
+			if (control.tails.state & CONTROL_RIGHT)
+			{
+				RayInitGlide_PressedForDown()
+			}
+			else
+			{
+				RayInitGlide_PressedForUp()
+			}
+		}
+	}
+	else
+	{
+		base.TailsStartFlight()
+		return
+	}
+}
+
+//# address-hook(0x014822) end(0x014932)
+function void UpdateTailsFlight()
+{
+	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) && XtraChar == 0) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) )
+	{
+		u8 input_state   = (tails.control_counter == 0) ? control.player1.state : control.tails.state
+		if (!(char.flags & char.flag.UNDERWATER))
+		{
+			if (!Audio.isPlayingAudio("glide_up") && !Audio.isPlayingAudio("glide_down") && !Audio.isPlayingAudio("glide_stationary") && !Audio.isPlayingAudio(0xA0))
+			{
+				Audio.playAudio("glide_stationary", AudioContext.CONTEXT_SOUND)
+			}
+		}
+		
+		if (tails.ai_routine >= 0x0E)
+		{
+			base.UpdateTailsFlight()
+			return
+		}
+
+		bool StopGlide = (XtraChar == 2) ? (!(input_state & CONTROL_ABC)) : (!(input_state & CONTROL_ABC) && (tails.control_counter != 0))
+		
+		
+		if (	StopGlide	||		(s16(char.position.y.u16) <= s16(level.vertical_wrap + char.hitbox_extends.y))		)
+		{
+			RayGlide_Stop()
+			return
+		}
+
+		// check direction and input
+		if (glideAnim == GLIDE_ANIM_MAIN)
+		{
+			if ( Ray_Boost && (control.tails.pressed & CONTROL_UP) && (XtraChar == 2 || tails.control_counter != 0) && tails.carrying == 0)
+			{
+				RayGlide_Boost()
+			}
+			if (char.flags & char.flag.FACING_LEFT)
+			{
+				// facing left
+				if (XtraChar == 2 || (tails.control_counter != 0 && tails.carrying == 0))
+				{
+					if (control.tails.state & CONTROL_LEFT)
+					{
+						RayGlide_PressedForDown()
+					}
+					else if (control.tails.state & CONTROL_RIGHT)
+					{
+						RayGlide_PressedForUp()
+					}
+				}
+				else if (isSecondCharacter(CHARACTER_TAILS))
+				{
+					RayHangGlide()
+				}
+			}
+			else
+			{
+				// facing right
+				if (XtraChar == 2 || (tails.control_counter != 0 && tails.carrying == 0))
+				{
+					if (control.tails.state & CONTROL_RIGHT)
+					{
+						RayGlide_PressedForDown()
+					}
+					else if (control.tails.state & CONTROL_LEFT)
+					{
+						RayGlide_PressedForUp()
+					}
+				}
+				else if (isSecondCharacter(CHARACTER_TAILS))
+				{
+					RayHangGlide()
+				}
+			}
+		}
+		
+		if (glideSwoopTimer != 0xFF)
+		{
+			glideSwoopTimer++
+		}
+		
+		if (glideSwoopTarget)
+		{
+			RayGlide_Swoop()
+		}
+		else
+		{
+			RayGlide_Vertical()
+			RayGlide_Horizontal()
+		}
+	}
+	else
+	{
+		base.UpdateTailsFlight()
+		return
+	}
+}
+
+function void RayInitGlide_PressedForUp()
+{	
+	
+	glideDirection = GLIDE_UP
+	
+	s16 minInitX = GLIDE_INIT_X_UP
+	s16 minInitY = GLIDE_INIT_Y_UP
+	
+	s16 xVelWork = char.velocity.x
+	s16 yVelWork = xVelWork
+	
+	if (char.flags & char.flag.UNDERWATER)
+	{
+		minInitX = GLIDE_INIT_X_UP_WATER
+		minInitY = GLIDE_INIT_Y_UP_WATER
+		
+		xVelWork = (xVelWork * 3) / 4	// use fraction of x vel for underwater calculations
+		yVelWork /= 2
+	}
+	
+	bool facingLeft = char.flags & char.flag.FACING_LEFT
+	
+	if (facingLeft)
+	{
+		xVelWork *= -1
+	}
+	
+	xVelWork = (xVelWork * GLIDE_INITX_UP_FRAC_NUM) / GLIDE_INITX_UP_FRAC_DENOM
+	
+	if (xVelWork < minInitX)
+	{
+		xVelWork = minInitX
+	}
+	
+	if (facingLeft)
+	{
+		xVelWork *= -1
+	}
+	else
+	{
+		yVelWork *= -1
+	}
+	
+	yVelWork = (yVelWork * GLIDE_INITY_UP_FRAC_NUM) / GLIDE_INITY_UP_FRAC_DENOM
+	
+	if (yVelWork > minInitY)
+	{
+		yVelWork = minInitY
+	}
+	
+	char.velocity.x = xVelWork
+	char.velocity.y = yVelWork
+	
+	if (!(char.flags & char.flag.UNDERWATER))
+	{
+		Audio.playAudio("glide_up", AudioContext.CONTEXT_SOUND)
+	}
+}
+
+
+function void RayInitGlide_PressedForDown()
+{
+	glideDirection = GLIDE_DOWN
+	
+	s16 minInitX = GLIDE_INIT_X_DOWN
+	s16 minInitY = GLIDE_INIT_Y_DOWN
+	
+	s16 xVelWork = char.velocity.x
+	s16 yVelWork = char.velocity.y
+	
+	s16 boost = GLIDE_INIT_Y_DOWN_BOOST
+	
+	if (char.flags & char.flag.UNDERWATER)
+	{
+		minInitX = GLIDE_INIT_X_DOWN_WATER
+		minInitY = GLIDE_INIT_Y_DOWN_WATER
+		
+		boost = GLIDE_INIT_Y_DOWN_BOOST_WATER
+	}
+	
+	bool facingLeft = char.flags & char.flag.FACING_LEFT
+	
+	if (facingLeft)
+	{
+		xVelWork *= -1
+	}
+	
+	xVelWork = (xVelWork * GLIDE_INITX_DOWN_FRAC_NUM) / GLIDE_INITX_DOWN_FRAC_DENOM
+	
+	if (xVelWork < minInitX)
+	{
+		xVelWork = minInitX
+	}
+	
+	if (facingLeft)
+	{
+		xVelWork *= -1
+	}
+	
+	yVelWork = (yVelWork * GLIDE_INITY_DOWN_FRAC_NUM) / GLIDE_INITY_DOWN_FRAC_DENOM
+	
+	if (yVelWork < minInitY)
+	{
+		yVelWork = minInitY
+	}
+	
+	yVelWork += boost
+	
+	char.velocity.x = xVelWork
+	char.velocity.y = yVelWork
+	
+	if (!(char.flags & char.flag.UNDERWATER))
+	{
+		Audio.playAudio("glide_down", AudioContext.CONTEXT_SOUND)
+	}
+}
+
+global bool Ray.Boosts
+
+global s16 Ray.vy
+
+function void RayGlide_Boost()
+{
+	if (!Ray.Boosts && glideDirection == GLIDE_UP)
+	{
+		if (Audio.isPlayingAudio("glide_stationary"))
+			Audio.stopChannel(0xBC)
+		playSound(0xA0)
+
+		Ray.vy = super.active.tails ? -0x46C : -0x3b0 //(super.active.tails & 0x80) // Hyper // super.active.tails == 1 // Super
+		SpawnRayDustCloud()
+		char.velocity.y = Ray.vy
+		if (char.flags & char.flag.UNDERWATER) 
+		{
+			char.velocity.y  = char.velocity.y / 2
+		}
+		Ray.Boosts = true
+	}
+}
+
+function void FadeoutSnds()
+{
+	if (Audio.isPlayingAudio("glide_stationary"))
+		Audio.fadeOutChannel(0xBC, 0x50)
+	else if (Audio.isPlayingAudio("glide_down"))
+		Audio.fadeOutChannel(0xDB, 0x30)
+	else if (Audio.isPlayingAudio("glide_up"))
+		Audio.fadeOutChannel(0xF0, 0x30)
+}
+
+function void Character.updateUprightOnGround()
+{
+	if (XtraChar == 2 ||  (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ))
+	{
+		Fall_Anim_Corkscrew = 0
+		TurnOffRayTail = false
+		FreeFall = false
+		Should_fall_anim = false
+		SuperFall = false
+		StopAnimation = true
+		FadeoutSnds()
+		flapframes = 0
+		Ray.Boosts = false
+		Flap = true
+		FreeFall = 0 // No more falling
+	}
+	base.Character.updateUprightOnGround()
+}
+
+// Ray shouldn't peelout
+function bool Character.updateSuperPeelout()
+{
+	//V1.11 Other characters (EG: Extra Life) should be able to peelout!
+	if (XtraChar == 2 ||  (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ))
+	{
+		return false
+	}
+	return base.Character.updateSuperPeelout()
+}
+
+// Dust
+global s16 dust_speed
+global bool flip_dust
+
+function void SpawnRayDustCloud()
+{
+	u32 A1backup = A1
+	
+	u8 count = 1
+	
+	dust_speed = 0x100
+
+	flip_dust = (char.flags & char.flag.FACING_LEFT) ? true : false
+	
+	while (count > 0)
+	{
+		--count
+		
+		if (allocDynamicObjectStd())
+		{
+			if (global.inv_gravity)
+			{
+				u8[A1 + 0x04] = (render_flag.WORLD)
+				objA1.update_address = 0x2004AC
+				//u16[A1 + 0x0a] = 0xa6bc
+				//u32[A1 + 0x0c] = 0x01a99a
+				objA1.position.y = objA0.position.y
+				objA1.position.x = objA0.position.x
+				objA1.state = 0
+				objA1.sprite_attributes = objA0.sprite_attributes
+				
+				objA1.position.y.u16 -= 0xf
+
+				if (char.flags & char.flag.FACING_LEFT)
+					objA1.position.x.u16 += 8
+				else
+					objA1.position.x.u16 -= 8
+				
+				objA1.velocity.x = dust_speed
+				
+				if (char.rotation)
+				{
+					objA1.flags2a = 1
+				}
+			}
+			else
+			{
+				u8[A1 + 0x04] = (render_flag.WORLD)
+				objA1.update_address = 0x2004AA
+				//u16[A1 + 0x0a] = 0xa6bc
+				//u32[A1 + 0x0c] = 0x01a99a
+				objA1.position.y = objA0.position.y
+				objA1.position.x = objA0.position.x
+				objA1.state = 0
+				objA1.sprite_attributes = objA0.sprite_attributes
+				
+				objA1.position.y.u16 += 0xf
+
+				if (char.flags & char.flag.FACING_LEFT)
+					objA1.position.x.u16 += 8
+				else
+					objA1.position.x.u16 -= 8
+				
+				objA1.velocity.x = dust_speed
+				
+				if (char.rotation)
+				{
+					objA1.flags2a = 1
+				}
+			}
+		}
+		if (dust_speed < 0)
+		{
+			dust_speed = -dust_speed
+			dust_speed += 0x80
+		}
+		else
+		{
+			dust_speed = -dust_speed
+		}
+		
+		if (!allocDynamicObjectStd())
+			return
+	}
+	
+	dust_speed = 0x80
+	
+	A1 = A1backup
+}
+
+//# address-hook(0x2004AA)
+function void Character.UpdateDustClouds()
+{
+	if (objA0.state > 79)
+	{
+		UnloadObject()
+		return
+	}
+	objA0.position.x += objA0.velocity.x
+	//UpdateMovementStraightSimple()
+	
+	if (objA0.flags2a)
+	{
+		if !(u16[0xffffb000 + 0x46] & 2)	// What path is Ray on?
+		{
+			D5 = 0x0c
+			checkStaticCollisionVertical(objA0.position.x.u16, objA0.position.y.u16, 0xfffff768, 0x10, 0)
+		}
+		else
+		{
+			D5 = 0x0f
+			checkStaticCollisionVertical(objA0.position.x.u16, objA0.position.y.u16, 0xfffff768, 0x10, 1)
+		}
+		D1.u16 -= 2
+		if abs(D1.u16) < 0x1b
+		{
+			objA0.position.y.u16 += D1.u16
+		}
+	}
+	
+	objA0.position.x.u16 -= u16[0xffffeebc] // needed for level wrap
+	
+	objA0.value26 = objA0.state / 16
+	objA0.state += abs(objA0.velocity.x) / 70
+	
+	DrawObject()
+}
+
+//# address-hook(0x2004AC)
+function void Character.UpdateDustCloudsInverted()
+{
+	if (objA0.state > 79)
+	{
+		UnloadObject()
+		return
+	}
+	objA0.position.x += objA0.velocity.x
+	// UpdateMovementStraightSimple()
+	
+	objA0.value26 = objA0.state / 16
+	objA0.state += abs(objA0.velocity.x) / 70
+	
+	objA0.position.x.u16 -= u16[0xffffeebc] // needed for level wrap
+	
+	DrawObject()
+}
+
+//END
+
+function void RayHangGlide()
+{
+	bool isLeft = ((char.flags & char.flag.FACING_LEFT) ? true : false)
+	if (glideDirection == GLIDE_DOWN)
+	{
+		RayGlide_ChangeAnim(GLIDE_ANIM_TURN)
+	}
+	u8 input_state   = (tails.control_counter == 0) ? control.player1.state : control.tails.state
+	glideDirection = GLIDE_UP
+	u16 forward = 0x381
+	u16 backward = 0x18F
+	if (tails.carrying == 1)
+	{
+		if (!isLeft)
+		{
+			if (input_state & CONTROL_RIGHT)
+			{
+				char.velocity.x = ((char.flags & char.flag.UNDERWATER) ? ((forward * 3) / 4) : forward)
+			}
+			else if (input_state & CONTROL_LEFT)
+			{
+				char.velocity.x = ((char.flags & char.flag.UNDERWATER) ? ((backward * 3) / 4) : backward)
+			}
+		}
+		else
+		{
+			if (input_state & CONTROL_LEFT)
+			{
+				char.velocity.x = ((char.flags & char.flag.UNDERWATER) ? (((-forward) * 3) / 4) : -forward)
+			}
+			else if (input_state & CONTROL_RIGHT)
+			{
+				char.velocity.x = ((char.flags & char.flag.UNDERWATER) ? (((-backward) * 3) / 4) : -backward)
+			}
+		}
+	}
+}
+
+
+function void RayGlide_PressedForUp()
+{
+	
+	if (glideDirection == GLIDE_DOWN)
+	{
+		RayGlide_ChangeAnim(GLIDE_ANIM_TURN)
+		
+		if (glideSwoopTimer >= GLIDE_SWOOP_DELAY)
+		{
+			RayGlide_SetUpSwoop()
+			
+			if (!(char.flags & char.flag.UNDERWATER))
+			{
+				if (Audio.isPlayingAudio("glide_stationary"))
+					Audio.stopChannel(0xBC)
+				Audio.playAudio("glide_up", AudioContext.CONTEXT_SOUND)
+			}
+		}
+	}
+	
+	glideDirection = GLIDE_UP
+}
+
+
+function void RayGlide_PressedForDown()
+{
+	if (glideDirection == GLIDE_UP)
+	{
+		if (Ray.Boosts)
+		{
+			Flap = false
+			StopAnimation = false
+		}
+		RayGlide_ChangeAnim(GLIDE_ANIM_TURN)
+		
+		glideSwoopTarget = 0
+			
+		if (!(char.flags & char.flag.UNDERWATER))
+		{
+			Audio.playAudio("glide_down", AudioContext.CONTEXT_SOUND)
+		}
+	}
+	
+	glideDirection = GLIDE_DOWN
+}
+
+
+function void RayGlide_SetUpSwoop()
+{
+	glideSwoopTimer = 0
+	
+	glideSwoopTarget = (abs(char.velocity.x) * -1 * GLIDE_SWOOP_MIN_FRAC_NUM) / GLIDE_SWOOP_MIN_FRAC_DENOM
+	
+	if (super.active.tails != 0xff)
+	{
+		s16 counterweight = glideSwoopCounterweight
+		
+		if (char.flags & char.flag.UNDERWATER)
+		{
+			counterweight = (counterweight * 3) / 4
+			counterweight += GLIDE_COUNTERWEIGHT_WATER_EXTRA
+		}
+		
+		if (counterweight >= abs(glideSwoopTarget))
+		{
+			return
+		}
+		
+		glideSwoopTarget += counterweight
+	}
+	
+	glideSwoopAccel = ((char.velocity.y * -1) + glideSwoopTarget) / GLIDE_SWOOP_STEPS
+	
+	glideSwoopCounterweight += GLIDE_COUNTERWEIGHT_INCREASE
+}
+
+
+function void RayGlide_Swoop()
+{
+	char.velocity.y += glideSwoopAccel
+	
+	if (char.velocity.y <= glideSwoopTarget)
+	{
+		char.velocity.y = glideSwoopTarget
+		glideSwoopTarget = 0
+		
+		RayGlide_Vertical()
+		RayGlide_Horizontal()
+	}
+}
+
+
+function void RayGlide_Vertical()
+{
+	s16 yAccel
+	s16 maxYvel
+	
+	if (glideDirection == GLIDE_UP)
+	{
+		// up
+		
+		if (char.flags & char.flag.UNDERWATER)
+		{
+			yAccel = GLIDE_Y_ACCEL_UP_WATER
+			maxYvel = GLIDE_MAX_Y_VEL_UP_WATER
+		}
+		else
+		{
+			yAccel = GLIDE_Y_ACCEL_UP
+			maxYvel = GLIDE_MAX_Y_VEL_UP
+		}
+	}
+	else
+	{
+		// down
+		
+		if (char.flags & char.flag.UNDERWATER)
+		{
+			yAccel = GLIDE_Y_ACCEL_DOWN_WATER
+			maxYvel = GLIDE_MAX_Y_VEL_DOWN_WATER
+		}
+		else
+		{
+			yAccel = GLIDE_Y_ACCEL_DOWN
+			maxYvel = GLIDE_MAX_Y_VEL_DOWN
+		}
+		
+		if (char.velocity.y < GLIDE_SWOOP_DOWN_MIN_Y)
+		{
+			yAccel *= 4
+		}
+	}
+	
+	if (char.velocity.y < maxYvel)
+	{
+		char.velocity.y += yAccel
+	}
+	else
+	{
+		char.velocity.y = maxYvel
+	}
+}
+
+
+function void RayGlide_Horizontal()
+{
+	if (char.flags & char.flag.FACING_LEFT)
+	{
+		char.velocity.x *= -1
+	}
+	
+	if (glideDirection == GLIDE_UP)
+	{
+		// up
+		
+		s16 xAccel
+		s16 minXvel
+
+		if (char.flags & char.flag.UNDERWATER)
+		{
+			xAccel = GLIDE_X_ACCEL_UP_WATER
+			minXvel = (tails.carrying == 0) ? GLIDE_MIN_X_VEL_WATER : GLIDE_MIN_X_VEL_GRABBED_WATER
+		}
+		else
+		{
+			xAccel = GLIDE_X_ACCEL_UP
+			minXvel = (tails.carrying == 0) ? GLIDE_MIN_X_VEL : GLIDE_MIN_X_VEL_GRABBED
+		}
+		
+		if (char.velocity.x > minXvel)
+		{
+			char.velocity.x += xAccel
+		}
+		else
+		{
+			//char.velocity.x = minXvel
+			char.velocity.x = (((char.velocity.x - minXvel) * 8) / 10) + minXvel	// improve interaction with bumpers
+		}
+	}
+	else if (glideAnim == GLIDE_ANIM_MAIN || glideAnimFrame >= 3)
+	{
+		// down
+		
+		s16 xAccel
+		s16 maxXvel
+		
+		if (char.flags & char.flag.UNDERWATER)
+		{
+			xAccel = GLIDE_X_ACCEL_DOWN_WATER
+			maxXvel = GLIDE_MAX_X_VEL_WATER
+			
+			if (super.active.tails == 0xff)
+			{
+				maxXvel += GLIDE_MAX_X_VEL_HYPER_BOOST_WATER
+			}
+		}
+		else
+		{
+			xAccel = GLIDE_X_ACCEL_DOWN
+			maxXvel = (glideSwoopCounterweight / 8) + GLIDE_MAX_X_VEL
+			
+			if (super.active.tails == 0xff)
+			{
+				maxXvel += GLIDE_MAX_X_VEL_HYPER_BOOST
+			}
+		}
+		
+		if (char.velocity.x < maxXvel)
+		{
+			char.velocity.x += xAccel
+		}
+		else
+		{
+			char.velocity.x = maxXvel
+		}
+	}
+	
+	if (char.flags & char.flag.FACING_LEFT)
+	{
+		char.velocity.x *= -1
+	}
+}
+
+
+function void RayGlide_Stop()
+{
+	if (tails.carrying)
+	{
+//		A0 = 0xffffb000
+		objA1.state = char.state.ROLLING
+		u8[A1 + 0x2e] = 0
+		objA1.flags2a |= char.flag.IN_AIR
+		tails.carrying = 0
+		tails.catch_timeout = 0
+	}
+	char.double_jump_state = -1			// set jump ability
+	char.animation.timer = 0			// resume normal animation
+	char.state = char.state.ROLLING
+}
+
