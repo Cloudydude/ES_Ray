@@ -1431,7 +1431,7 @@ function string getExtraCharacterPaletteKey(u8 xtrachar)
 function void fn05d9ee()
 {
 	// Falling from space
-	if (XtraChar == 2 && Mods.isModActive("Extra Slot Mighty") && End_Pilot == 1)
+	if (global.xtrachar == 2 && Mods.isModActive("Extra Slot Mighty") && End_Pilot == 1)
 	{
 		ExtraChar.loadCharacterPalette(0x01, 0x802080 + u32(0x01 * 0x40), 0x00)
 		ExtraChar.loadSpecialPalettes(0x01, CHARACTER_SONIC, 0x802080 + u32(0x01 * 0x40), 0x00)
