@@ -24,12 +24,12 @@ function void ExtraChar.startup_char2()
 
 function u32 getCharacterColorsForControllerLEDs(u8 character)
 {
-	return (character == CHARACTER_SONIC && XtraChar == 2 && levelselect.characters != 0) ? 0x00d8fc : base.getCharacterColorsForControllerLEDs(character)
+	return (character == CHARACTER_SONIC && global.xtrachar == 2 && levelselect.characters != 0) ? 0x00d8fc : base.getCharacterColorsForControllerLEDs(character)
 }
 
 function u64 getCharacterBonusTextIcon(u8 character)
 {
-	if (XtraChar == 2)
+	if (global.xtrachar == 2)
 		return (Ray_hud_type == 0) ? "hud_bonus_icon_slot2" : "Nothing"
 	else
 		return base.getCharacterBonusTextIcon(character)
@@ -53,7 +53,7 @@ function u64 ExtraChar.getIconSpriteKey_char2(u8 type)
 // Numbers for time, rings and everything
 function void HUD.drawDigit(u8 digit, u16 px, u16 py, u16 renderQueue)
 {
-	if (XtraChar != 2 || Ray_hud_type == 0)
+	if (global.xtrachar != 2 || Ray_hud_type == 0)
 	{
 		base.HUD.drawDigit(digit, px, py, renderQueue)
 		return
@@ -65,7 +65,7 @@ function void HUD.drawDigit(u8 digit, u16 px, u16 py, u16 renderQueue)
 // Numbers for lives
 function void HUD.drawSmallDigit(u8 digit, u16 px, u16 py, u16 renderQueue)
 {
-	if (XtraChar != 2 || Ray_hud_type == 0)
+	if (global.xtrachar != 2 || Ray_hud_type == 0)
 	{
 		base.HUD.drawSmallDigit(digit, px, py, renderQueue)
 		return
@@ -279,7 +279,7 @@ function bool ExtraChar.renderHUD_char2()
 
 function u64 getTailsSuperTheme()
 {
-	if (XtraChar == 2)
+	if (global.xtrachar == 2)
 		return "2c_sonic3"
 	else
 		return base.getTailsSuperTheme()
@@ -287,7 +287,7 @@ function u64 getTailsSuperTheme()
 
 function u64 getTailsHyperTheme()
 {
-	if (XtraChar == 2)
+	if (global.xtrachar == 2)
 		return "2e_proto"
 	else
 		return base.getTailsHyperTheme()
