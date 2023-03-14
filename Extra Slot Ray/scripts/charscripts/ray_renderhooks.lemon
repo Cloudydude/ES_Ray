@@ -391,6 +391,17 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 	
 	if ((global.characters != CHARS_TAILS_ALONE) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ))// || objA0.update_address == 0x00927a) Just player one, thanks!
 	{
+		if (objA0.update_address == 0x0837b2) //SIGNPOST
+		{
+			if (objA0.animation.sprite == 0x01) //Ray
+			{
+				key = (!Ray_Sprite_type) ? "signpost_slot2_Mania_0x01" : "signpost_slot2_0x01"
+				atex = 0x40 + CHARACTER_TAILS * 0x20
+				Renderer.drawCustomSprite(key, px, py, atex, flags, renderQueue)
+				return true
+			}       
+		}
+		
 		if ((objA0.update_address == 0x067472 || (isSonicIntro() && objA0.update_address == 0x01abb6 && objA0.base_state == 0x1A)))
 		{	// Fix for Sonic in the intro, if the player is using custom Sonic sprites
 			u8 animationSprite = objA0.animation.sprite
@@ -686,7 +697,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 	{
 		if (objA0.update_address == 0x0837b2) //SIGNPOST
 		{
-			if (objA0.animation.sprite == 0x01 && Ray_Sprite_type == 0) //Ray
+			if (objA0.animation.sprite == 0x01 && !Ray_Sprite_type) //Ray
 			{
 				atex = 0x40 + 0x20 * getMainCharacter()
 				Renderer.drawCustomSprite("signpost_slot2_Mania_0x01", px, py, atex, flags , renderQueue)
