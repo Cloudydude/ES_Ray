@@ -49,28 +49,48 @@ function void ExtraChar.Menu.actselect.items.characterlist.drawleader(s16 px, s1
 	if (actselect.character.backup == CHARS_SONIC_AND_TAILS)
 	{
 		px -= 0x0b
+	#if GAMEAPP <= 0x22121500
 		Standalone.drawCharacterSpriteDirect(CHARACTER_SONIC, px, py, 0xb1, 0x00 | SPRITE_FLAG_FLIP_X, 0x40, renderQueue)
+	#else
+		Renderer.drawCustomSprite(getCharacterSelectSpriteKey(CHARACTER_SONIC), px, py, 0x40, SPRITE_FLAG_PRIO | SPRITE_FLAG_FLIP_X, renderQueue)
+	#endif
 		px += 0x0e
 		py += 0x02
 		
 		if (Ray_Partner == 0x01 || Ray_Partner == 0x04)
 			Renderer.drawCustomSprite(key, px + ((Ray_Sprite_type == 0x00) ? 0x09: 0x07), py + 0x12, atex, 0x00 | SPRITE_FLAG_FLIP_X, renderQueue)
 		else
+		{
+		#if GAMEAPP <= 0x22121500
 			Standalone.drawCharacterSpriteDirect(CHARACTER_TAILS, px, py, 0xa6, 0x00 | SPRITE_FLAG_FLIP_X, 0x60, renderQueue)
+		#else
+			Renderer.drawCustomSprite(getCharacterSelectSpriteKey(CHARACTER_TAILS), px, py, 0x60, SPRITE_FLAG_PRIO | SPRITE_FLAG_FLIP_X, renderQueue)
+		#endif
+		}
 	}
 	
 	// Knuckles & Tails
 	else if (actselect.character.backup == CHARS_KNUCKLES_AND_TAILS)
 	{
 		px -= 0x07
+	#if GAMEAPP <= 0x22121500
 		Standalone.drawCharacterSpriteDirect(CHARACTER_KNUCKLES, px, py, 0xd9, 0x00 | SPRITE_FLAG_FLIP_X, 0x80, renderQueue)
+	#else
+		Renderer.drawCustomSprite(getCharacterSelectSpriteKey(CHARACTER_KNUCKLES), px, py, 0x80, SPRITE_FLAG_PRIO | SPRITE_FLAG_FLIP_X, renderQueue)
+	#endif
 		px += 0x0b
 		py += 0x02
 		
 		if (Ray_Partner == 0x02 || Ray_Partner == 0x04)
 			Renderer.drawCustomSprite(key, px + ((Ray_Sprite_type == 0x00) ? 0x09: 0x07), py + 0x12, atex, 0x00 | SPRITE_FLAG_FLIP_X, renderQueue)
 		else
+		{
+		#if GAMEAPP <= 0x22121500
 			Standalone.drawCharacterSpriteDirect(CHARACTER_TAILS, px, py, 0xa6, 0x00 | SPRITE_FLAG_FLIP_X, 0x60, renderQueue)
+		#else
+			Renderer.drawCustomSprite(getCharacterSelectSpriteKey(CHARACTER_TAILS), px, py, 0x60, SPRITE_FLAG_PRIO | SPRITE_FLAG_FLIP_X, renderQueue)
+		#endif
+		}
 	}
 	
 	else
@@ -620,7 +640,13 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 				else if (Renderer.hasCustomSprite("charselect_sonic"))
 					Renderer.drawCustomSprite("charselect_sonic", px-9, py-20, 0x40, SPRITE_FLAG_PRIO | SPRITE_FLAG_FLIP_X, 0xffff)
 				else
+				{
+				#if GAMEAPP <= 0x22121500
 					Standalone.drawCharacterSpriteDirect(CHARACTER_SONIC, px-9, py-20, 0xb1, SPRITE_FLAG_PRIO | SPRITE_FLAG_FLIP_X, 0x40, 0xffff)
+				#else
+					Renderer.drawCustomSprite(getCharacterSelectSpriteKey(CHARACTER_SONIC), px-9, py-20, 0x40, SPRITE_FLAG_PRIO | SPRITE_FLAG_FLIP_X, renderQueue)
+				#endif
+				}
 				objA0.animation.sprite = 0
 				atex = getatex(0x02)
 				key = Ray_menu_sprites()
@@ -639,7 +665,13 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 				else if (Renderer.hasCustomSprite("charselect_knuckles"))
 					Renderer.drawCustomSprite("charselect_knuckles", px-7, py-20, 0x80, SPRITE_FLAG_PRIO | SPRITE_FLAG_FLIP_X, 0xffff)
 				else
+				{
+				#if GAMEAPP <= 0x22121500
 					Standalone.drawCharacterSpriteDirect(CHARACTER_KNUCKLES, px-7, py-20, 0xd9, SPRITE_FLAG_PRIO | SPRITE_FLAG_FLIP_X, 0x80, 0xffff)
+				#else
+					Renderer.drawCustomSprite(getCharacterSelectSpriteKey(CHARACTER_KNUCKLES), px-7, py-20, 0x80, SPRITE_FLAG_PRIO | SPRITE_FLAG_FLIP_X, renderQueue)
+				#endif
+				}
 				objA0.animation.sprite = 0
 				atex = getatex(0x02)
 				key = Ray_menu_sprites()
