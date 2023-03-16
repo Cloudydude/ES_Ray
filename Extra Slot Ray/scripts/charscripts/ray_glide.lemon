@@ -35,23 +35,7 @@ function void Character.updateJumpMoves()
 					#if STANDALONE
 						if (Input.buttonPressed(BUTTON_Y) && !System.getGlobalVariableValueByName("original_mode"))
 						{
-							if (Mods.isModActive("Characters Go Super Then Hyper"))
-							{
-								if ((isSuperActive == 0xff) == 0 && char.invuln.countdown == 0)	// Check invulnerability to prevent spamming of super activate + cancel
-								{
-									if (global.chaos_emeralds >= 7 && global.traded_emeralds == 0 && super.active)
-									{
-										char.jumping = 0
-										return
-									}
-									else if (Character.performSuperTransformation())
-									{
-										char.jumping = 0
-										return
-									}
-								}
-							}
-							else if (!isSuperActive && char.invuln.countdown == 0)	// Check invulnerability to prevent spamming of super activate + cancel
+							if (!isSuperActive && char.invuln.countdown == 0)	// Check invulnerability to prevent spamming of super activate + cancel
 							{
 								if (Character.performSuperTransformation())
 									return

@@ -425,7 +425,6 @@ global bool TurnOffRayTail
 // Render Ray's high-speed dash animation
 function bool RayCustomRendering(u8 character, u8 variant, s16 px, s16 py, bool asSmallGhost)
 {
-	//System.writeDisplayLine(stringformat("char.double_jump_state = %d", char.double_jump_state))
 	bool isPlayer1 = (variant == 0)
 	u32 characterAddress = isPlayer1 ? 0xffffb000 : 0xffffb04a
 

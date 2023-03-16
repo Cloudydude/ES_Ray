@@ -1063,8 +1063,17 @@ function bool Character.performSuperTransformation()
 	}
 	
 	// Already super?
-	if (super.active)
-		return false
+	if (Mods.isModActive("Characters Go Super Then Hyper"))
+	{
+		if (super.active == 0xff || super.active.tails == 0xff)
+			return false
+	}
+	else
+	{
+		if (super.active)
+			return false
+	}
+
 	if (!System.getGlobalVariableValueByName("original_mode") && !Input.buttonPressed(BUTTON_Y)) // DA Garden
 		return false
 
@@ -1132,7 +1141,6 @@ function bool Character.performSuperTransformation()
 		if (possibleSuperForm == 2)
 		{
 			// the flicky army of death are on their union break
-			//u32[0xffffcd7c] = 0x01a170
 
 		#if STANDALONE
 			super.active.tails = 0xff
@@ -1149,7 +1157,6 @@ function bool Character.performSuperTransformation()
 		if (possibleSuperForm == 2)
 		{
 			// the flicky army of death are on their union break
-			//u32[0xffffcd7c] = 0x01a170
 
 		#if STANDALONE
 			super.active.tails = 0xff
@@ -1173,22 +1180,20 @@ function bool Character.performSuperTransformation()
 
 	if (Mods.isModActive("Characters Go Super Then Hyper"))
 	{
-		if (System.getGlobalVariableValueByName("TransformStyle") == 0)
+		if (super.active == 1) || (super.active.tails == 1)
 		{
-			playSound(SFX_SUPERTRANSFORM)
-			if (super.active == 1) || (super.active.tails == 1)
-			{
-				super.palettefx.state = 1
-				super.palettefx.timer = 0x0f
-				super.ring_dec.frames = 60
-				char.control_flags = 0x81
-			}
-			#if STANDALONE
-				chooseFittingMusic()	// Usually switches to super theme
-			#else
-				playMusic(0x2c)
-			#endif
+			super.palettefx.state = 1
+			super.palettefx.timer = 0x0f
+			super.ring_dec.frames = 60
+			char.control_flags = 0x81
 		}
+		playSound(SFX_SUPERTRANSFORM)
+		#if STANDALONE
+			chooseFittingMusic()	// Usually switches to super theme
+		#else
+			playMusic(MUSIC_INVINCIBLE)
+		#endif
+
 
 		setSpeedCapProperties(A4)
 
@@ -1211,7 +1216,7 @@ function bool Character.performSuperTransformation()
 	#if STANDALONE
 		chooseFittingMusic()	// Usually switches to super theme
 	#else
-		playMusic(0x2c)
+		playMusic(MUSIC_INVINCIBLE)
 	#endif
 	}
 
