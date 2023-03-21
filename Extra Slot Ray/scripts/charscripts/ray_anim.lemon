@@ -1,7 +1,7 @@
 //# address-hook(0x0160d2)
 function void TailsTails.Update()
 {
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && !isMainCharacter(CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && !isMainCharacter(CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 	{
 		// Update various properties from Tails main object
 		A2 = 0xffff0000 + u16[A0 + 0x30]
@@ -48,7 +48,7 @@ function void TailsTails.Update()
 //# address-hook(0x015862) end(0x015aae)
 function void UpdateTailsAnimation()
 {
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 	{
 		if (/*(objA0.state == char.state.RUNNING && global.zone_act == 0x0c00) || */tails.ai_routine == 0x04 || tails.ai_routine == 0x0E || tails.ai_routine == 0x10 || tails.ai_routine == 0x22 || (char.state == char.state.TAILS_FLYDOWN && global.zone_act != 0x0201) || (char.state == char.state.RUNNING && global.zone_act == 0x0d01 && u8[A0 + 0x2e] == 0x81))	// Flying like Tails
 		{
@@ -232,7 +232,7 @@ function void RayGlide_ChangeAnim(u8 anim)
 //# address-hook(0x0160d2)
 function void TailsTails.Update()
 {
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 	{
 		A1 = 0xffff0000 + u16[A0 + 0x30]
 		
@@ -252,7 +252,7 @@ function void TailsTails.Update()
 // Use Sonic's run animation but still have a high-speed dash animation
 function void updateSonicAnimationRunning()
 {
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 	{
 		D0 = 0
 		if ((u8[A0 + 0x2d] & 0x80) || char.rotation.x != 0)
@@ -328,7 +328,7 @@ function void updateSonicAnimationRunning()
 // Use normal jump animation for Tails
 function void updateSonicAnimationRolling()
 {
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 	{
 		D1.u8 = char.flags & char.flag.FACING_LEFT
 		char.render_flags = (char.render_flags & 0xfc) | D1.u8
@@ -358,7 +358,7 @@ function void updateSonicAnimationRolling()
 //# address-hook(0x012a72) end(0x012aa2)
 function void updateSonicAnimationPushing()
 {
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 	{
 		--char.animation.timer
 		if (s8(char.animation.timer) < 0)
@@ -383,7 +383,7 @@ function bool Standalone.drawCharacterSprite(u8 character, u8 variant, s16 px, s
 {
 
 	//Ray's animations will override the normal render
-	if (global.xtrachar == 2 || (A0 != 0xffffb000 && !isMainCharacter(CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	if (global.xtrachar == 2 || (A0 != 0xffffb000 && !isMainCharacter(CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 	{//custom render routines
 		return RayCustomRendering(character, variant, px, py, asSmallGhost)
 	}
@@ -957,7 +957,7 @@ function bool RayCustomRendering(u8 character, u8 variant, s16 px, s16 py, bool 
 // Origins SSZ parity mod compatibility 
 function void XtraClawcords()
 {
-    if (XtraChar == 2)
+    if (global.xtrachar == 2)
     {
         if ((u8[0xfffffab8] & 0x20) == 0)
         {
@@ -972,7 +972,7 @@ function void XtraClawcords()
 
 function void XtraInClaw()
 {
-	if (XtraChar == 2)
+	if (global.xtrachar == 2)
 	{
 		u8[A1 + 0x20] = char.state.LIFTED
 		objA1.animation.sprite = 0xc9
@@ -983,7 +983,7 @@ function void XtraInClaw()
 
 function void XtraEscape()
 {
-	if (XtraChar == 2)
+	if (global.xtrachar == 2)
 	{
 		A1 = 0xffffb000
 		// objA0.position.x.u16 = objA1.position.x.u16
@@ -1003,7 +1003,7 @@ function void XtraEscape()
 
 function bool XtraOnGround()
 {
-	if (XtraChar == 2)
+	if (global.xtrachar == 2)
 	{
 		Raybreaksout()
 		return true

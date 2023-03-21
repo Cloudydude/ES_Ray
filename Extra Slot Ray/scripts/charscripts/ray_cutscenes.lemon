@@ -2,7 +2,7 @@
 //# address-hook(0x044a26) end(0x044a62)
 function void fn044a26()
 {
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[0xffffb038] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) )
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[0xffffb038] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) )
 	{
 		player1.control_override = 1
 		control.player1 = 0x0800
@@ -40,7 +40,7 @@ function void fn044a26()
 function void fn08d53e()
 {
 	base.fn08d53e()
-	if (XtraChar == 2)
+	if (global.xtrachar == 2)
 	{
 		A1 = 0xffffb000
 		D0 = u8[A1 + 0x38]
@@ -53,7 +53,7 @@ function void fn08d53e()
 // Super Emeralds cutscene in HPZ
 function void fn090eae()
 {
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[A1 + 0x38] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[A1 + 0x38] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 	{
 		D0 = u8[A1 + 0x38]
 		u8[0x090bcb] = u8[0x090bca]
@@ -76,7 +76,7 @@ function void fn090eae()
 //# address-hook(0x065e72)
 function void fn065e72()
 {
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[A1 + 0x38] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) )
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[A1 + 0x38] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) )
 	{
 		u8[A1 + 0x20] = 0x05
 		if (objA0.animation.frame >= 0x0c)
@@ -105,7 +105,7 @@ function void fn065e72()
 function void fn064ca6()
 {
 	base.fn064ca6()
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[0xffffb038] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) )
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[0xffffb038] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) )
 	{
 		A1 = 0xffffb000
 		if (u8[A1 + 0x20] == char.state.LOOKING_UP)
@@ -119,7 +119,7 @@ function void fn064ca6()
 //# address-hook(0x05fd88) end(0x05fd9a)
 function void fn05fd88()
 {
-	if (XtraChar != 2 || global.characters != CHARS_TAILS_ALONE)
+	if (global.xtrachar != 2 || global.characters != CHARS_TAILS_ALONE)
 	{
 		base.fn05fd88()
 		return
@@ -142,7 +142,7 @@ function void fn05fd88()
 //# address-hook(0x07e44c) end(0x07e4a0)
 function void fn07e44c()
 {
-	if (XtraChar != 2 || u8[0xffffb038] != CHARACTER_TAILS)
+	if (global.xtrachar != 2 || u8[0xffffb038] != CHARACTER_TAILS)
 	{
 		base.fn07e44c()
 		return
@@ -177,7 +177,7 @@ function void fn07e44c()
 //# address-hook(0x07fe06) end(0x07fe2a)
 function void fn07fe06()
 {
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[A1 + 0x38] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[A1 + 0x38] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 	{
 		u8[A1 + 0x38] = 0x00
 		base.fn07fe06()
@@ -190,122 +190,34 @@ function void fn07fe06()
 	}
 }
 
-// Fix for Ray's hyper palette during the ending where he's falling
+// Fix for Ray's super/hyper palette palette during the ending where he's falling
 //# address-hook(0x05d8bc) end(0x05d9e8)
 function void fn05d8bc()
 {
-	if (XtraChar != 2)
-	{
-		base.fn05d8bc()
-		return
-	}
-	setupObjectAttributesFull(0x0600da)
-
-	objA0.render_flags &= ~0x04
-	objA0.base_state = 0x02
-	fn05fe82()
-
-	player1.camera_lock = 0xff
-	u8[0xfffffab8] = 0
-
-	A1 = 0xffffb000
-	u8[A1 + 0x04] &= ~0x04
-	u8[A1 + 0x0a] |= 0x80
-	u16[A1 + 0x1c] = 0x0800
-	objA1.state = char.state.LIFTED
-	u8[A1 + 0x2a] = 0
-	u8[A1 + 0x2e] = 0x81
-
-	u32[0xffffb04a] = 0
-	super.ring_dec.frames = 0x7fff
-	hud.dirty.timer = 0x01
-
-	if (outro.ending_type >= 0)
+	base.fn05d8bc()
+	if (outro.ending_type >= 0 && global.xtrachar == 2)
 	{
 		if (outro.ending_type == 0)
 		{
-			if (isMainCharacter(CHARACTER_SONIC))
+			fn05fc8e()
+			if (allocDynamicObjectStd())
 			{
-				fn05fc8e()
-				if (allocDynamicObjectStd())
-				{
-					objA1.update_address = 0x05fdd4
-				}
-
-				// Change Sonic's colors back to white
-			#if STANDALONE
-				if (EXTENDED_CHARACTER_PALETTES)
-				{
-					fillMemory_u16(0x802004, 6, 0x0eee)
-				}
-				else
-			#endif
-				{
-					u16[0xfffffc04] = 0x0eee
-					u16[0xfffffc06] = 0x0eee
-					u16[0xfffffc08] = 0x0eee
-				}
+				objA1.update_address = 0x05fdd4
 			}
 		}
 		else
 		{
 			u8[0xffffb020] = 0
 			fn05fcce()
-
-			// Change Sonic's colors back to white
-		#if STANDALONE
-			if (EXTENDED_CHARACTER_PALETTES)
-			{
-				fillMemory_u16(0x802004, 6, 0x0eee)
-			}
-			else
-		#endif
-			{
-				u16[0xfffffc04] = 0x0eee
-				u16[0xfffffc06] = 0x0eee
-				u16[0xfffffc08] = 0x0eee
-			}
 		}
 	}
-
-	objA0.position.x.u16 = 0x0100 + getScreenExtend()
-	objA0.position.y.u16 = 0xe0
-
-	// Spawn the Tornado
-	A1 = 0xffffb250
-	u16[A0 + 0x44] = A1.u16
-	objA1.update_address = 0x05ea52
-	u8[A1 + 0x2c] = 0xff
-	u8[A1 + 0x38] |= 0x04
-	u16[A1 + 0x46] = A0.u16
-
-	// Spawn the Master Emerald
-	A1 = 0xffffbde0
-	objA1.update_address = 0x05de60
-	u16[A1 + 0x46] = A0.u16
-	objA1.position.x.u16 = 0x011e + getScreenExtend()
-	objA1.position.y.u16 = 0xcf
-
-	copyMemory(0xfffffcc0, 0x0a97bc, 0x20)
-
-	Kosinski.addToDMAQueue(0x17fcba, 0xa5c0)
-	Kosinski.addToDMAQueue(0x163418, 0x3c60)
-	Kosinski.addToDMAQueue(0x162914, 0x4dc0)
-
-#if STANDALONE
-	Game.startSkippableCutscene()
-
-	if (Game.isNormalGame())
-		Game.setAchievementComplete(ACHIEVEMENT_LONGPLAY)
-#endif
 }
 
-
-// Another ending sequence fix
+// Another ending sequence fix, around where the Tornado flies in
 //# address-hook(0x05da74) end(0x05db28)
 function void fn05da74()
 {
-	if (XtraChar != 2 || global.characters != CHARS_TAILS_ALONE)
+	if (global.xtrachar != 2 || global.characters != CHARS_TAILS_ALONE)
 	{
 		base.fn05da74()
 		return
@@ -326,9 +238,7 @@ function void fn05da74()
 
 	D0 = -0x20
 	u8[A1 + 0x42] = D0.u8
-	D1.u16 = objA1.position.x.u16
-	D1.u16 -= D0.u16
-	objA0.position.x.u16 = D1.u16
+	objA0.position.x.u16 = objA1.position.x.u16 - D0.s16
 
 	D0 = 0x2b
 	if (global.characters == CHARS_TAILS_ALONE)
@@ -337,9 +247,7 @@ function void fn05da74()
 		u8[0xffffcc0e] &= ~0x04
 	}
 	u8[A1 + 0x43] = D0.u8
-	D1.u16 = objA1.position.y.u16
-	D0.s16 = -D0.s16
-	D1.u16 += D0.u16
+	D1.u16 = objA1.position.y.u16 - D0.s16
 	objA0.position.y.u16 = D1.u16
 	u16[A0 + 0x3a] = D1.u16
 
@@ -355,17 +263,59 @@ function void fn05da74()
 		u32[A1 + 0x0c] = /*(global.characters != CHARS_TAILS_ALONE) ?*/ 0x146620 //: 0x148eb8
 	}
 
-	u8[A1 + 0x20] = 0x05
+	u8[A1 + 0x20] = char.state.STANDING
 	u8[A1 + 0x2e] = 0x83
 	fn05fd88()
 	fn05db2c()
 }
 
-// Ending where Ray turns super/hyper and jumps off the plane
+// Credits
+// Here so that Ray doesn't sink into the Tornado by 4 pixels
+//# address-hook(0x05ea74) end(0x05ead6)
+function void fn05ea74()
+{
+	if (global.xtrachar != 2 || global.characters != CHARS_TAILS_ALONE)
+	{
+		base.fn05ea74()
+		return
+	}
+	
+	setupObjectAttributesFull(0x0600ce)
+
+	if (objA0.flags38 & 0x04)
+	{
+		objA0.flags38 &= ~0x04
+		objA0.render_flags &= ~render_flag.WORLD
+	}
+
+	if (objA0.subtype2c != 0)
+	{
+		objA0.base_state = 0x04
+		objA0.position.x.u16 = 0x40
+		objA0.position.y.u16 = 0x010b
+		u16[A0 + 0x3a] = 0x010b
+		if (outro.ending_type >= 0)
+		{
+			spawnChildObjects(0x0601e8)
+		}
+	}
+
+	/*if (global.characters == CHARS_TAILS_ALONE)
+	{
+		u8[A0 + 0x43] -= 4
+	}*/
+
+	objA0.render_flags |= render_flag.COMPOUND
+	u16[A0 + 0x16] = 0x02
+
+	spawnChildObjects(0x0601c2)
+}
+
+// Ending where Ray jumps off the plane and turns super/hyper
 //# address-hook(0x08648c) end(0x08653e)
 function void fn08648c()
 {
-	if (XtraChar != 2)
+	if (global.xtrachar != 2)
 	{
 		base.fn08648c()
 		return
@@ -401,60 +351,14 @@ function void fn08648c()
 //# address-hook(0x05e4e2) end(0x05e4fe)
 function void fn05e4e2()
 {
-	if (XtraChar != 2)
+	if (global.xtrachar != 2)
 	{
 		base.fn05e4e2()
 		return
 	}
 
 	if ((u8[0xfffffab8] & 0x08) == 0)
-	{
 		DrawObject()
-	}
 	else
-	{
 		Object.TriggerUnloading()
-	}
-}
-
-
-// Credits
-//# address-hook(0x05ea74) end(0x05ead6)
-function void fn05ea74()
-{
-	if (XtraChar != 2 || global.characters != CHARS_TAILS_ALONE)
-	{
-		base.fn05ea74()
-		return
-	}
-	
-	setupObjectAttributesFull(0x0600ce)
-
-	if (objA0.flags38 & 0x04)
-	{
-		objA0.flags38 &= ~0x04
-		objA0.render_flags &= ~render_flag.WORLD
-	}
-
-	if (objA0.subtype2c != 0)
-	{
-		objA0.base_state = 0x04
-		objA0.position.x.u16 = 0x40
-		objA0.position.y.u16 = 0x010b
-		u16[A0 + 0x3a] = 0x010b
-		if (outro.ending_type >= 0)
-		{
-			spawnChildObjects(0x0601e8)
-		}
-	}
-
-	/*if (global.characters == CHARS_TAILS_ALONE)
-	{
-		u8[A0 + 0x43] -= 4
-	}*/
-
-	objA0.render_flags |= render_flag.COMPOUND
-	u16[A0 + 0x16] = 0x02
-
-	spawnChildObjects(0x0601c2)
 }

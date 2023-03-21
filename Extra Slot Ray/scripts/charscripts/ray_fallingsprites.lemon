@@ -3,7 +3,7 @@
 function void SpringVertical.ApplyToCharacter()
 {
 	base.SpringVertical.ApplyToCharacter()
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[A1 + 0x38] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[A1 + 0x38] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 	{
 		if (objA0.subtype2c & 0x01)
 		{
@@ -19,7 +19,7 @@ function void SpringVertical.ApplyToCharacter()
 function void fn0234e6()
 {
 	base.fn0234e6()
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[A1 + 0x38] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[A1 + 0x38] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 	{
 		if (objA0.subtype2c & 0x01)
 		{
@@ -34,7 +34,7 @@ function void fn0234e6()
 // Falling animation for level transitions
 function void fn0067ee()
 {
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 	{
 		if (Ray_Level_Transition_Fall != 1)
 		{
@@ -108,7 +108,7 @@ function void fn077a98()
 //# address-hook(0x017b24) end(0x017bb4)
 function void Character.LandingOnGroundNoSpindash()
 {
-	if (XtraChar == 2 ||  (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ))
+	if (global.xtrachar == 2 ||  (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ))
 	{
 		FreeFall = 0
 		TurnOffRayTail = false

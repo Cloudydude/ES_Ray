@@ -6,7 +6,7 @@ function void Character.Initialization.shared(u8 character)
 	if (global.game_mode == 0x8c)
 		zeroMemory(0x802280, 0x120)
 	Move_Ray = false
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 	{
 		MGZ2Fix = false
 		TurnOffRayTail = false
@@ -129,7 +129,7 @@ function void Character.Initialization.shared(u8 character)
 //# address-hook(0x006a76) end(0x006bd6)
 function void InitializeGameCharacters()
 {
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 	{
 		IsUsingShield = false
 		hang_tail = false
@@ -157,7 +157,7 @@ function void ExtraChar.CompetitionMode.Character.setupPhysics(u8 xtrachar, u16 
 //Fix for Lava Reef act 2 boulder cutscene, LBZ cup elevator and when Ray enters doomsday zone
 function bool isMainCharacter(u8 character)
 {
-	if (XtraChar == 2)
+	if (global.xtrachar == 2)
 	{
 			// Lava Reef act 2 boulder cutscene						// FBZ act 2 dual plane										  // LBZ tube elevator																				  // LBZ cup elevator
 		if ((D4 == 0xffffff8d && global.zone_act == 0x0901) || (global.zone_act == 0x0401 && objA0.update_address == 0x0532e0) || (global.zone_act == 0x0600 && D0.u8 == 0x10) || (global.zone_act == 0x0601 && objA0.position.x.u16 == 0x2d20 && objA0.position.y.u16 == 0x06f8))
@@ -176,7 +176,7 @@ function bool isMainCharacter(u8 character)
 // Fix placement when colliding with floor while gliding
 function void Character.LandingOnGroundStandUp()
 {
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 	{
 		RayFrameCounter = 0
 		D0.u8 = char.hitbox_extends.y		// Setting D0.u8 here is important for some reason
@@ -211,7 +211,7 @@ function void Character.LandingOnGroundStandUp()
 //# address-hook(0x01c11e) end(0x01c236)
 function void UpdateCameraPositionY()
 {
-	if (XtraChar != 2)
+	if (global.xtrachar != 2)
 	{
 		base.UpdateCameraPositionY()
 		return
@@ -382,7 +382,7 @@ function void UpdateCameraPositionY()
 //# address-hook(0x0147b8) end(0x014820)
 function void Character.UpdateTailsUprightInAir()
 {
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ))
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ))
 	{
 		// Flying or not?
 		if (char.double_jump_state == 0)
@@ -443,7 +443,7 @@ function void fn0329b8()
 	D1.u16 = objA1.position.y.u16 - objA0.position.y.u16 + 0x14
 	if (D0.u16 < objA0.value32 && D1.u16 < 0x28 && u8[A1 + 0x05] < 0x04)
 	{
-		if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[A1 + 0x38] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+		if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[A1 + 0x38] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 		{
 			u8[A1 + 0x2f] = -1						// set jump ability
 			objA1.animation.timer = 0
@@ -462,7 +462,7 @@ function void fn0329b8()
 //# address-hook(0x0153c2) end(0x01560a)
 function void Character.CheckCollision()
 {
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 	{
 	#if STANDALONE
 		if (A0 == 0xffffb000)
@@ -675,7 +675,7 @@ function void Character.CheckCollision()
 //# address-hook(0x014f08) end(0x014f72)
 function void Character.CheckAgainstMoveBorders()
 {
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 	{
 		// Get x-position (upper 16 bits = full pixel coordinate) after movement update
 		u16 px = (char.position.x + (s32(char.velocity.x) << 8)) >> 16
@@ -744,7 +744,7 @@ function void Character.CheckAgainstMoveBorders()
 //# address-hook(0x01e042)
 function void fn01e042()
 {
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[A1 + 0x38] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[A1 + 0x38] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 	{
 		if (D0.u16 != 0)
 		{
@@ -813,7 +813,7 @@ function void StopGlideIfRay()
 //# address-hook(0x0103ba) end(0x01040a)
 function void fn0103ba()
 {
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 	{
 		if (char.double_jump_state == 1 && glideDirection == GLIDE_DOWN && (u32[A1] == 0x032eaa || u32[A1] == 0x07f344))
 		{
@@ -828,7 +828,7 @@ function void fn0103ba()
 // Fix Tails's spindash on slopes with larger hitbox
 function void releaseSpindash()
 {
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && !isMainCharacter(CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) )) && A0 != 0xffffb000)
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && !isMainCharacter(CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) )) && A0 != 0xffffb000)
 	{
 		// Release spindash!
 		char.hitbox_extends.x = 7
@@ -891,7 +891,7 @@ function void releaseSpindash()
 //# address-hook(0x018b54) end(0x018ba4)
 function void fn018b54()
 {
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && !isMainCharacter(CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) )) && A0 != 0xffffcc54)
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && !isMainCharacter(CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) )) && A0 != 0xffffcc54)
 	{
 		objA0.base_state += 2
 		objA0.mapping_offset = 0x018df4
@@ -927,7 +927,7 @@ function void fn018b54()
 //# address-hook(0x00ffd4) end(0x010214)
 function void Character.OnCollisionWithDynamicObject()
 {
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 	{
 		// Example values for u8[A1 + 0x28]:
 		//  - 0x06, 0x0b, 0x17, 0x1a = Different types of enemies
@@ -1045,7 +1045,7 @@ function void Character.OnCollisionWithDynamicObject()
 //# address-hook(0x01a170) end(0x01a198)
 function void fn01a170()
 {
-	if (XtraChar != 2)
+	if (global.xtrachar != 2)
 	{
 		base.fn01a170()
 		return
@@ -1057,7 +1057,7 @@ function void fn01a170()
 // Always allow both Super and Hyper Ray, fix transformation animation, and remove the Flicky army of death
 function bool Character.performSuperTransformation()
 {
-	if (XtraChar != 2 || char.character != CHARACTER_TAILS)
+	if (global.xtrachar != 2 || char.character != CHARACTER_TAILS)
 	{
 		return base.Character.performSuperTransformation()
 	}
@@ -1234,7 +1234,7 @@ function bool Character.performSuperTransformation()
 //# address-hook(0x01da60) end(0x01db26)
 function void ItemEffect.ApplySuperTransformation()
 {
-	if (XtraChar != 2 || u8[A1 + 0x38] != CHARACTER_TAILS)
+	if (global.xtrachar != 2 || u8[A1 + 0x38] != CHARACTER_TAILS)
 	{
 		base.ItemEffect.ApplySuperTransformation()
 		return
@@ -1309,7 +1309,7 @@ function void ItemEffect.ApplySuperTransformation()
 //# address-hook(0x01560c) end(0x01569a)
 function void Character.LandingOnGround()
 {
-	if (XtraChar != 2 || char.character != CHARACTER_TAILS)
+	if (global.xtrachar != 2 || char.character != CHARACTER_TAILS)
 	{
 		base.Character.LandingOnGround()
 		return
@@ -1353,7 +1353,7 @@ function void Character.LandingOnGround()
 
 function void Character.LandingOnGroundResetState()
 {
-	if (XtraChar == 2 ||  (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ))
+	if (global.xtrachar == 2 ||  (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ))
 	{
 		if (abs(char.double_jump_state) == 1)
 			System.setGlobalVariableValueByName("powerspringtimer_p1", 3)
@@ -1383,7 +1383,7 @@ function void Character.LandingOnGroundResetState()
 // Use general transformation animation for Ray
 function void Character.updateBonusEffects()
 {
-	if (XtraChar != 2 || char.character != CHARACTER_TAILS)
+	if (global.xtrachar != 2 || char.character != CHARACTER_TAILS)
 	{
 		base.Character.updateBonusEffects()
 		return
@@ -1472,7 +1472,7 @@ function void Character.updateBonusEffects()
 function void fn030cf8()
 {
 	base.fn030cf8()
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[A1 + 0x38] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[A1 + 0x38] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 	{
 		if (u8[A1 + 0x1e] < 0x13)
 			u8[A1 + 0x1e] = 0x13
@@ -1484,7 +1484,7 @@ function void fn030cf8()
 //# address-hook(0x0148ac)
 function void UpdateTailsFlight_innerB()
 {
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) )))
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) )))
 	{
 		if (char.flags & char.flag.UNDERWATER)
 		{
@@ -1546,7 +1546,7 @@ function void UpdateTailsFlight_innerB()
 //# address-hook(0x02dd3e) end(0x02dd92)
 function void LevelResults.UpdateCharacterNameDisplay()
 {
-	if (XtraChar != 2 || global.characters != CHARS_TAILS_ALONE)
+	if (global.xtrachar != 2 || global.characters != CHARS_TAILS_ALONE)
 	{
 		base.LevelResults.UpdateCharacterNameDisplay()
 		return
@@ -1565,7 +1565,7 @@ function void LevelResults.UpdateCharacterNameDisplay()
 //# address-hook(0x03d78c) end(0x03d902)
 function void fn03d78c()
 {
-	if (XtraChar != 2)
+	if (global.xtrachar != 2)
 	{
 		base.fn03d78c()
 		return
@@ -1640,7 +1640,7 @@ function void fn03aa7e()
 				u8[A1 + 0x20] = (D1.u16 == 0) ? char.state.HANGING : char.state.RUNNING
 
 				D1.u8 += u8[A2 + 0x08]
-				if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[A1 + 0x38] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+				if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[A1 + 0x38] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 				{
 					if (hang_tail)
 					{
@@ -1733,7 +1733,7 @@ function void fn03aa7e()
 //# address-hook(0x048c44) end(0x048d2a)
 function void fn048c44()
 {
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[A1 + 0x38] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) ))
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && u8[A1 + 0x38] == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 	{
 		if (debug_mode.state != 0)
 			return
@@ -1800,7 +1800,7 @@ function void fn048c44()
 //# address-hook(0x014534) end(0x01459c)
 function void Tails.CheckCatchSonic()
 {
-	if (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) )
+	if (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) )
 	{
 		// There's a timeout to consider
 		if (u8[A2+1] != 0)
@@ -1853,7 +1853,7 @@ function void Tails.UpdateCarrySonic()
 	//  A1 = 0xffffb000  -> Player 1 object address
 	//  A2 = 0xfffff73e  -> Address of "tails.carrying"
 
-	if (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ) )
+	if (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) )
 	{
 		if (u8[A2] == 0)
 		{

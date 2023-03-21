@@ -84,7 +84,7 @@ function void SuperandHyperPalette_Ray()
 
 function void UpdatePaletteEffects.SuperForm.moddingVersion(u8 characterVersion)
 {
-	if (XtraChar != 2)
+	if (global.xtrachar != 2)
 	{
 		base.UpdatePaletteEffects.SuperForm.moddingVersion(characterVersion)
 		return

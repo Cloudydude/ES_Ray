@@ -2,7 +2,7 @@
 //# address-hook(0x009212) end(0x009274)
 function void fn009212()
 {
-	if ((global.characters != CHARS_TAILS_ALONE) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ))
+	if ((global.characters != CHARS_TAILS_ALONE) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ))
 	{
 		base.fn009212()
 		
@@ -53,7 +53,7 @@ function void fn009212()
 //# address-hook(0x009488) end(0x0094d2)
 function void fn009488()
 {
-	if (XtraChar == 2 || ((global.characters != CHARS_TAILS_ALONE) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) )))
+	if (global.xtrachar == 2 || ((global.characters != CHARS_TAILS_ALONE) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) )))
 	{
 		A1 = 0xffff0000 + objA0.value3e
 		objA0.position.x.u16 = objA1.position.x.u16
@@ -97,7 +97,7 @@ function void fn009488()
 function void fn008faa()
 {
 	base.fn008faa()
-	if (XtraChar == 2)
+	if (global.xtrachar == 2)
 	{
 		objA0.mapping_offset = 0x2908ba
 		objA0.sprite_attributes = (sprite_attribute.PRIORITY | sprite_attribute.PALETTE.LINE1 | (SpecialStage.Tails.targetInVRAM >> 5))
@@ -117,7 +117,7 @@ function void fn008faa()
 function void fn04df86()
 {
 	base.fn04df86()
-	if (XtraChar == 2)
+	if (global.xtrachar == 2)
 	{
 		objA0.mapping_offset = 0x148eb8
 		objA0.state = char.state.WIN_POSE

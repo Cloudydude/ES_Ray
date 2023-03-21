@@ -328,7 +328,7 @@ function void Ray_Coords()
 function void fn05c7b2()
 {
 	base.fn05c7b2()
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) )))
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) )))
 		u16[A0 + 0x22] = 0xba00
 }
 
@@ -338,7 +338,7 @@ function void fn08555e()
 {
     base.fn08555e()
 
-	if ((global.framecounter % 0x02) == 0x00 && XtraChar == 0x02)
+	if ((global.framecounter % 0x02) == 0x00 && global.xtrachar == 0x02)
 	{
 		if (objA0.update_address != 0x01abb6)
 		{
@@ -351,7 +351,7 @@ global bool Move_Ray
 
 function void ExtraChar.Character.onEndingLogo.fade()
 {
-	if (XtraChar == 0x02)
+	if (global.xtrachar == 0x02)
 		Move_Ray = true
 	base.ExtraChar.Character.onEndingLogo.fade()
 }
@@ -409,7 +409,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		return true
 	}
 	
-	if ((global.characters != CHARS_TAILS_ALONE) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ))// || objA0.update_address == 0x00927a) Just player one, thanks!
+	if ((global.characters != CHARS_TAILS_ALONE) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ))// || objA0.update_address == 0x00927a) Just player one, thanks!
 	{
 		if (objA0.update_address == 0x0837b2) //SIGNPOST
 		{
@@ -448,7 +448,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		// Intro plane
 		else if (objA0.update_address == 0x0677ce || objA0.update_address == 0x067800)
 		{
-			if (XtraChar == 1 && System.getGlobalVariableValueByName("Mighty_Pilot") != 2)
+			if (global.xtrachar == 1 && System.getGlobalVariableValueByName("Mighty_Pilot") != 2)
 				return base.Standalone.onWriteToSpriteTable(px, py, renderQueue)
 			key = (Ray_Sprite_type) ? "S3_ray_in_tornado" : "Mania_ray_in_tornado"
 			Renderer.drawCustomSprite(key, px, py - 16, 0, flags, renderQueue + 2)
@@ -725,7 +725,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		}
 	}
 	
-	if (XtraChar == 2)
+	if (global.xtrachar == 2)
 	{
 		if (objA0.update_address == 0x0837b2) //SIGNPOST
 		{
@@ -1147,7 +1147,7 @@ function u64 GetXtraName(u8 xtrachar, u8 char)
 function void SpecialStage()
 {
 	//let's load this only for Ray
-	if (XtraChar != 2)
+	if (global.xtrachar != 2)
 	{
 		base.SpecialStage()
 		return
@@ -1451,10 +1451,9 @@ global u8 Ray_Pal
 function string getCharacterPaletteKey(u8 character)
 {
 	u8 gameMode = global.game_mode & 0x7f
-	if ((XtraChar == 2 && character == CHARACTER_TAILS && gameMode != 0x4c && gameMode != 0x44 && gameMode != 0x2c && gameMode != 0x30) || character == 4 || gameMode != 0x4c && (global.characters != CHARS_TAILS_ALONE && character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0 && global.game_mode != 0x9c) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) && global.game_mode != 0x9c || (Ray_Partner == 3 && XtraChar == 1 && global.game_mode != 0x9c) || (Ray_Partner == 4 && global.game_mode != 0x9c)) ) ))
-	{
+	if ((global.xtrachar == 2 && character == CHARACTER_TAILS && gameMode != 0x4c && gameMode != 0x44 && gameMode != 0x2c && gameMode != 0x30) || character == 4 || gameMode != 0x4c && (global.characters != CHARS_TAILS_ALONE && character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0 && global.game_mode != 0x9c) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) && global.game_mode != 0x9c || (Ray_Partner == 3 && global.xtrachar == 1 && global.game_mode != 0x9c) || (Ray_Partner == 4 && global.game_mode != 0x9c)) ) ))
 		return getExtraCharacterPaletteKey(0x02)
-	}
+
     return base.getCharacterPaletteKey(character)
 }
 
@@ -1462,9 +1461,7 @@ function string getCharacterPaletteKey(u8 character)
 function string getExtraCharacterPaletteKey(u8 xtrachar)
 {
 	if (xtrachar == 0x02)
-	{
 		return stringformat("slot2palette_0%d", Ray_Pal)
-	}
 	
 	// Return the base function
 	return base.getExtraCharacterPaletteKey(xtrachar)
@@ -1532,7 +1529,7 @@ function string getManiaInspSignpost(u8 character)
 
 	if (Renderer.hasCustomSprite(key))
 	{
-		if (XtraChar == 0)
+		if (global.xtrachar == 0)
 		{
 			if (isMainCharacter(CHARACTER_SONIC))
 			{
@@ -1551,7 +1548,7 @@ function string getManiaInspSignpost(u8 character)
 				}
 			}
 		}
-		else if (XtraChar == 2 && character == CHARACTER_TAILS)
+		else if (global.xtrachar == 2 && character == CHARACTER_TAILS)
 			return key
 	}
 	else
@@ -1566,7 +1563,7 @@ function string getManiaInspSignpost(u8 character)
 // Ending pose fixes
 function string getCharacterEndPosePaletteKey(u8 character)
 {
-	if (XtraChar != 2)
+	if (global.xtrachar != 2)
 	{
 		return base.getCharacterEndPosePaletteKey(character)
 	}
@@ -1576,7 +1573,7 @@ function string getCharacterEndPosePaletteKey(u8 character)
 
 function u8 getModdedEndPosePaletteLine(u8 character, bool isHyperEffect)
 {
-	if (XtraChar != 2)
+	if (global.xtrachar != 2)
 	{
 		return base.getModdedEndPosePaletteLine(character, isHyperEffect)
 	}
@@ -1585,7 +1582,7 @@ function u8 getModdedEndPosePaletteLine(u8 character, bool isHyperEffect)
 
 function void loadCharacterEndPosePalette(u8 character, u32 targetAddress, u8 paletteVariant)
 {
-	if (XtraChar != 2)
+	if (global.xtrachar != 2)
 	{
 		base.loadCharacterEndPosePalette(character, targetAddress, paletteVariant)
 		return
@@ -1595,7 +1592,7 @@ function void loadCharacterEndPosePalette(u8 character, u32 targetAddress, u8 pa
 
 function bool UpdatePaletteEffects.SuperForm.endpose()
 {
-	if (XtraChar != 2)
+	if (global.xtrachar != 2)
 	{
 		return base.UpdatePaletteEffects.SuperForm.endpose()
 	}
@@ -1604,7 +1601,7 @@ function bool UpdatePaletteEffects.SuperForm.endpose()
 
 function void UpdatePaletteEffects.SuperForm.endpose.moddingVersion(u8 characterVersion)
 {
-	if (XtraChar != 2)
+	if (global.xtrachar != 2)
 	{
 		base.UpdatePaletteEffects.SuperForm.endpose.moddingVersion(characterVersion)
 		return

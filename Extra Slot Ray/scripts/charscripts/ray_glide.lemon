@@ -15,7 +15,7 @@ function void Character.updateJumpMoves()
 
 	if (char.jumping)
 	{
-		if (XtraChar == 2 ||  (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ))
+		if (global.xtrachar == 2 ||  (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ))
 		{
 			// Limit velocity.y
 			s16 max_vy = (char.flags & char.flag.UNDERWATER) ? -0x200 : -0x400
@@ -143,7 +143,7 @@ function void RayShieldPressedJumpInMidAir()
 #if STANDALONE
 function bool onCharacterPressedJumpInMidAir(u8 input_state, u8 input_pressed)
 {
-	if (XtraChar == 2 ||  (global.characters != CHARS_TAILS_ALONE && !isMainCharacter(CHARACTER_TAILS)) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ))
+	if (global.xtrachar == 2 ||  (global.characters != CHARS_TAILS_ALONE && !isMainCharacter(CHARACTER_TAILS)) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ))
 	{
 		return onCharacterPressedJumpInMidAir_Ray(input_state, input_pressed)
 	}
@@ -218,7 +218,7 @@ function bool onCharacterPressedJumpInMidAir_Ray(u8 input_state, u8 input_presse
 
 function void TailsStartFlight()
 {
-	if (XtraChar == 2 ||  (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ))
+	if (global.xtrachar == 2 ||  (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ))
 	{
 		FreeFall = false
 		char.flags &= ~char.flag.ROLLING					// stop rolling
@@ -272,7 +272,7 @@ function void TailsStartFlight()
 //# address-hook(0x014822) end(0x014932)
 function void UpdateTailsFlight()
 {
-	if (XtraChar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) && XtraChar == 0) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) )
+	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) && global.xtrachar == 0) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) )
 	{
 		u8 input_state   = (tails.control_counter == 0) ? control.player1.state : control.tails.state
 		if (!(char.flags & char.flag.UNDERWATER))
@@ -289,7 +289,7 @@ function void UpdateTailsFlight()
 			return
 		}
 
-		bool StopGlide = (XtraChar == 2) ? (!(input_state & CONTROL_ABC)) : (!(input_state & CONTROL_ABC) && (tails.control_counter != 0))
+		bool StopGlide = (global.xtrachar == 2) ? (!(input_state & CONTROL_ABC)) : (!(input_state & CONTROL_ABC) && (tails.control_counter != 0))
 		
 		
 		if (	StopGlide	||		(s16(char.position.y.u16) <= s16(level.vertical_wrap + char.hitbox_extends.y))		)
@@ -301,14 +301,14 @@ function void UpdateTailsFlight()
 		// check direction and input
 		if (glideAnim == GLIDE_ANIM_MAIN)
 		{
-			if ( Ray_Boost && (control.tails.pressed & CONTROL_UP) && (XtraChar == 2 || tails.control_counter != 0) && tails.carrying == 0)
+			if ( Ray_Boost && (control.tails.pressed & CONTROL_UP) && (global.xtrachar == 2 || tails.control_counter != 0) && tails.carrying == 0)
 			{
 				RayGlide_Boost()
 			}
 			if (char.flags & char.flag.FACING_LEFT)
 			{
 				// facing left
-				if (XtraChar == 2 || (tails.control_counter != 0 && tails.carrying == 0))
+				if (global.xtrachar == 2 || (tails.control_counter != 0 && tails.carrying == 0))
 				{
 					if (control.tails.state & CONTROL_LEFT)
 					{
@@ -327,7 +327,7 @@ function void UpdateTailsFlight()
 			else
 			{
 				// facing right
-				if (XtraChar == 2 || (tails.control_counter != 0 && tails.carrying == 0))
+				if (global.xtrachar == 2 || (tails.control_counter != 0 && tails.carrying == 0))
 				{
 					if (control.tails.state & CONTROL_RIGHT)
 					{
@@ -519,7 +519,7 @@ function void FadeoutSnds()
 
 function void Character.updateUprightOnGround()
 {
-	if (XtraChar == 2 ||  (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ))
+	if (global.xtrachar == 2 ||  (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ))
 	{
 		Fall_Anim_Corkscrew = 0
 		TurnOffRayTail = false
@@ -540,7 +540,7 @@ function void Character.updateUprightOnGround()
 function bool Character.updateSuperPeelout()
 {
 	//V1.11 Other characters (EG: Extra Life) should be able to peelout!
-	if (XtraChar == 2 ||  (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && XtraChar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && XtraChar == 1) || Ray_Partner == 4) ))
+	if (global.xtrachar == 2 ||  (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ))
 	{
 		return false
 	}
