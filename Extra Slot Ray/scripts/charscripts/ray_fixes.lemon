@@ -2035,6 +2035,16 @@ function void fn05ca9e()
 	}
 }
 
+// Ignore the setting for Super and Hyper Tails
+// Give Ray a Super and Hyper form
+function u32 Game.getSetting(u32 settingId)
+{
+	if (global.xtrachar == 2 && settingId == SETTING_HYPER_TAILS)
+		return 1
+
+	return base.Game.getSetting(settingId)
+}
+
 // Fix for LBZ act 1 where the snow particles don't appear at the start
 //# address-hook(0x039ad2) end(0x039b64)
 function void fn039ad2()
