@@ -429,7 +429,6 @@ function bool RayCustomRendering(u8 character, u8 variant, s16 px, s16 py, bool 
 	u32 characterAddress = isPlayer1 ? 0xffffb000 : 0xffffb04a
 
 	bool TailControl = (!isMainCharacter(CHARACTER_TAILS) && !isSecondCharacter(CHARACTER_TAILS)) // Check wether Ray is used for act transitions
-
 	// Check only needed for Tails' tails
 	if (variant == 2)
 	{
