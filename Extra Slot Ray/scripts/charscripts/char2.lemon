@@ -18,6 +18,8 @@ define u16 continueHUD.x = 20
 function void ExtraChar.startup_char2()
 {
 	global.characters = CHARS_TAILS_ALONE
+	if (global.game_mode == 0x1c) // Level Select
+		levelselect.characters = 2
 }
 
 
