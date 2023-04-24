@@ -220,7 +220,7 @@ function void TailsStartFlight()
 {
 	if (global.xtrachar == 2 ||  (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ))
 	{
-		FreeFall = false
+		// FreeFall = false
 		char.flags &= ~char.flag.ROLLING					// stop rolling
 		
 		char.state = char.state.BALANCING2					// repurpose 2nd balance state for gliding
@@ -521,17 +521,17 @@ function void Character.updateUprightOnGround()
 {
 	if (global.xtrachar == 2 ||  (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ))
 	{
-		Fall_Anim_Corkscrew = 0
-		TurnOffRayTail = false
-		FreeFall = false
-		Should_fall_anim = false
-		SuperFall = false
+		// Fall_Anim_Corkscrew = 0
+		// TurnOffRayTail = false
+		// FreeFall = false
+		// Should_fall_anim = false
+		// SuperFall = false
 		StopAnimation = true
 		FadeoutSnds()
 		flapframes = 0
 		Ray.Boosts = false
 		Flap = true
-		FreeFall = 0 // No more falling
+		// FreeFall = 0 // No more falling
 	}
 	base.Character.updateUprightOnGround()
 }

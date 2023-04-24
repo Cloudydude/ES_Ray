@@ -8,7 +8,6 @@ include ray_renderhooks
 include ray_bluesphere
 include ray_intro
 include ray_super_palette
-include ray_fallingsprites
 
 global string Ray_Hud_Name
 global bool Ray_Speed_Shoes
@@ -300,9 +299,7 @@ function bool fn00d458()
     bool controlCheck = (control.pad1.pressed & CONTROL_DOWN) || (control.pad1.pressed & CONTROL_UP)
 
 	if (Mods.isModActive("Extra Save Slots") && System.getGlobalVariableValueByName("ESS_save_entered") == 0)
-	{
 		return base.fn00d458()
-	}
     
     if (u8[A0 + 0x05] == 0x02 && completedSlot && controlCheck)
     { // This makes it so that you don't see Ray's clear portrait in the zone icons while picking a level
@@ -342,10 +339,7 @@ function bool fn00d458()
         return base.fn00d458()
     }
     else 
-    {
-        // Return the Base function
-        return base.fn00d458()
-    }
+        return base.fn00d458() // Return the Base function
 }
 
 function string MegamixHud.getCharName_ES2()
@@ -422,4 +416,26 @@ function string getCharacterLivesIcon(u8 character)
 		return stringformat("hud_lives_icon_%s", characterName)
 	}
 	return base.getCharacterLivesIcon(character)
+}
+
+
+// Ray, moments before he gets covered in snow
+//# address-hook(0x053a4c) end(0x053ad2)
+function void fn053a4c()
+{
+	// Part of the avalanche controller after the snowboarding section
+	if (global.xtrachar == 0x02)
+	{
+		A1 = 0xffffb000
+		if (player1.control_override != 0 && s16[A1 + 0x1c] == 0)
+		{// Looking up before the character is covered in snow
+			u8[A1 + 0x20] = char.state.LOOKING_UP
+			u8[A1 + 0x2e] = 0x01 // char.control_flags that prevents the character from being controlled directly 
+		}
+
+		if (objA0.position.y.u16 == 0x070e && player1.control_override != 0) // Stop looking up after the character is covered in snow
+			u8[A1 + 0x2e] = 0 // resumes normal control
+	}
+
+    base.fn053a4c()
 }

@@ -106,11 +106,11 @@ define u16	RAY_DASH_ANIM_SPEED					= 0xa00
 define u8	RAY_DASH_ANIM_FRAME_FIRST			= 0xDA
 define u8	RAY_DASH_ANIM_FRAME_LAST			= 0xDD
 
-define u8 FreeFall = u8[0xffffE656 + ((A0 == 0xffffb000) ? 0 : 0x01)]
-define u8 Force_Fall = u8[0xffffF735 + ((A0 == 0xffffb000) ? 0 : 0x01)]
-define u8 Should_fall_anim = u8[0xffffF737 + ((A0 == 0xffffb000) ? 0 : 0x01)]
-define u8 Fall_Anim_Corkscrew = u8[0xffffF739 + ((A0 == 0xffffb000) ? 0 : 0x01)]
-define u8 SuperFall = u8[0xffffF73B + ((A0 == 0xffffb000) ? 0 : 0x01)]
+// define u8 FreeFall = u8[0xffffE656 + ((A0 == 0xffffb000) ? 0 : 0x01)]
+// define u8 Force_Fall = u8[0xffffF735 + ((A0 == 0xffffb000) ? 0 : 0x01)]
+// define u8 Should_fall_anim = u8[0xffffF737 + ((A0 == 0xffffb000) ? 0 : 0x01)]
+// define u8 Fall_Anim_Corkscrew = u8[0xffffF739 + ((A0 == 0xffffb000) ? 0 : 0x01)]
+// define u8 SuperFall = u8[0xffffF73B + ((A0 == 0xffffb000) ? 0 : 0x01)]
 
 // define u8	RAY_SPRING_ANIM_FRAME_1				= 0xA8
 // define u8	RAY_SPRING_ANIM_FRAME_2				= 0x8E

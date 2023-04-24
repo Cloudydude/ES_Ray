@@ -332,7 +332,6 @@ function void fn05c7b2()
 		u16[A0 + 0x22] = 0xba00
 }
 
-global bool DONT
 //# address-hook(0x08555e) end(0x08558e)
 function void fn08555e()
 {
@@ -341,9 +340,7 @@ function void fn08555e()
 	if ((global.framecounter % 0x02) == 0x00 && global.xtrachar == 0x02)
 	{
 		if (objA0.update_address != 0x01abb6)
-		{
-			DONT = true
-		}
+			u8[0xffffb128 + 0x26] = 1
 	}
 }
 
@@ -354,20 +351,6 @@ function void ExtraChar.Character.onEndingLogo.fade()
 	if (global.xtrachar == 0x02)
 		Move_Ray = true
 	base.ExtraChar.Character.onEndingLogo.fade()
-}
-
-//# address-hook(0x05f2ea) end(0x05f2f2)
-function void fn05f2ea()
-{
-	DONT = false // need this for the hyper ending
-	base.fn05f2ea()
-}
-
-//# address-hook(0x05f5de) end(0x05f64e)
-function void fn05f5de()
-{
-	DONT = false // need this for the super ending
-	base.fn05f5de()
 }
 
 function string getRaySprite()
@@ -551,14 +534,13 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 				Renderer.drawCustomSprite(key, px, py, atex, flags, renderQueue)
 				return true
 			}
-			else if (objA0.update_address == 0x0160d2) // Tail
+			else if (objA0.update_address == 0x0160d2) // tail
 			{
 				key = stringformat((Ray_Sprite_type == 0) ? "character_Mania_tails_0x%02x" : "character_slot2_tails_0x%02x", objA0.animation.sprite)
 				Renderer.drawCustomSprite(key, px, py - 4, atex, flags, renderQueue)
 				return true
 			}
-			// Ray waiting and running
-			else if (objA0.update_address == 0x05c790)
+			else if (objA0.update_address == 0x05c790) // Ray waiting and running
 			{
 				u64 name = (Ray_Sprite_type == 0) ? "Mania_Ray" : "character_slot2"
 
@@ -1111,10 +1093,12 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 			return true
 		}
 
+		// Ray ending pose
 		if (objA0.update_address == 0x05e18a) 
 		{	
-			if (outro.ending_type >= 0 && !DONT)
+			if (outro.ending_type >= 0 && !objA0.value26)
 				SuperandHyperPalette_Ray()
+
 			Renderer.drawCustomSprite(stringformat("RayPose_0x%02x", objA0.animation.sprite), px + ((objA0.animation.sprite == 3) ? 0x30 : 0x50), py, 0x60, objA0.render_flags | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
 			return true        
 		}

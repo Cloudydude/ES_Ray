@@ -50,7 +50,12 @@ function void UpdateTailsAnimation()
 {
 	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 	{
-		if (/*(objA0.state == char.state.RUNNING && global.zone_act == 0x0c00) || */tails.ai_routine == 0x04 || tails.ai_routine == 0x0E || tails.ai_routine == 0x10 || tails.ai_routine == 0x22 || (char.state == char.state.TAILS_FLYDOWN && global.zone_act != 0x0201) || (char.state == char.state.RUNNING && global.zone_act == 0x0d01 && u8[A0 + 0x2e] == 0x81))	// Flying like Tails
+		if (char.state == 0x36)
+		{
+			base.UpdateTailsAnimation()
+			return
+		}
+		else if (/*(objA0.state == char.state.RUNNING && global.zone_act == 0x0c00) || */tails.ai_routine == 0x04 || tails.ai_routine == 0x0E || tails.ai_routine == 0x10 || tails.ai_routine == 0x22 || (char.state == char.state.TAILS_FLYDOWN && global.zone_act != 0x0201) || (char.state == char.state.RUNNING && global.zone_act == 0x0d01 && u8[A0 + 0x2e] == 0x81))	// Flying like Tails
 		{
 			glideDirection = GLIDE_UP
 			RayGlide_Animate()
@@ -381,7 +386,6 @@ function void updateSonicAnimationPushing()
 
 function bool Standalone.drawCharacterSprite(u8 character, u8 variant, s16 px, s16 py, bool asSmallGhost)
 {
-
 	//Ray's animations will override the normal render
 	if (global.xtrachar == 2 || (A0 != 0xffffb000 && !isMainCharacter(CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 	{//custom render routines
@@ -415,12 +419,32 @@ global u8 RayLookingUpFrameCounter
 global u8 RayLookingDownFrameCounter
 global bool Ray_Sprite_type
 
-global bool Ray_Twirl_Fall
-global bool Ray_Transform_Fall
-global bool Ray_Level_Transition_Fall
-global bool Ray_Uncurled_Fall
-
 global bool TurnOffRayTail
+
+function string getESCharacterFallSpriteKey(u8 character, u8 extrachar)
+{
+	if (global.xtrachar == 2 || (A0 != 0xffffb000 && !isMainCharacter(CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
+		return (Ray_Sprite_type == 0) ? "Mania_Ray_cannon_ball" : "S3_Ray_cannon_ball"
+	return base.getESCharacterFallSpriteKey(character, extrachar)
+}
+
+function string getFallSpriteKey(u8 character)
+{
+	if (global.xtrachar == 2 || (A0 != 0xffffb000 && !isMainCharacter(CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
+		return (Ray_Sprite_type == 0) ? "Mania_Ray_cannon_ball" : "S3_Ray_cannon_ball"
+	return base.getFallSpriteKey(character)
+}
+
+function u64 Standalone.getModdedAnimationSpriteKey(u8 character, u16 animationSpriteEx)
+{
+	if (global.xtrachar == 2 || (A0 != 0xffffb000 && !isMainCharacter(CHARACTER_TAILS) && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
+	{
+		if (char.state == char.state.DIED_GREY && Mods.isModActive("Burnt Death Sprites"))
+			return (Ray_Sprite_type == 0) ? "Mania_Ray_0xa8" : "character_slot2_0xa8"
+	}
+	return base.Standalone.getModdedAnimationSpriteKey(character, animationSpriteEx)
+}
+
 
 // Render Ray's high-speed dash animation
 function bool RayCustomRendering(u8 character, u8 variant, s16 px, s16 py, bool asSmallGhost)
@@ -480,7 +504,7 @@ function bool RayCustomRendering(u8 character, u8 variant, s16 px, s16 py, bool 
 	u16 animationSpriteEx = Standalone.getModdedAnimationSpriteEx(character, animationSprite)
 	u8 flags = (char.render_flags & 0x03)
 	u8 angle = 0
-	u64 key = 0
+	u64 key = Standalone.getModdedAnimationSpriteKey(character, animationSpriteEx)		// First ask modded scripts
 	u8 rotationMode = 0
 	u8 Smooth_ctrl = (Ray_Smooth_setting == 0) ? 2 : 1
 
@@ -769,67 +793,13 @@ function bool RayCustomRendering(u8 character, u8 variant, s16 px, s16 py, bool 
 	}
 	else
 	{
-		if (Game.getSetting(SETTING_SMOOTH_ROTATION))
-		{
-			// Tails' tails
-			if (animationSprite >= 0x05 && animationSprite <= 0x14)
-			{
-				animationSprite = 0x05 + (animationSprite - 0x05) % 4
-				angle = lookupAngleByVector(s16[characterAddress + 0x18], s16[characterAddress + 0x1a])
-
-				flags = 0
-				if (objA0.flags2a & 0x01)
-				{
-					flags |= SPRITE_FLAG_FLIP_X
-					angle += 0x80
-				}
-				if (global.inv_gravity)
-				{
-					flags ^= SPRITE_FLAG_FLIP_Y
-					angle = -angle
-				}
-			}
-		}
-		if (TurnOffRayTail && char.state == 0x01 && !eggmobile_LBZ2)
-			return true
-		else
-		{
-			if (RayLookingUpFrameCounter > 14 || RayLookingDownFrameCounter != 0)
-				key = "Nothing"
-			else
-				key = stringformat((Ray_Sprite_type == 0) ? "character_Mania_tails_0x%02x" : "character_slot2_tails_0x%02x", animationSprite)
-		}
+		key = stringformat((Ray_Sprite_type == 0) ? "character_Mania_tails_0x%02x" : "character_slot2_tails_0x%02x", animationSprite)
 
 		if (!Renderer.hasCustomSprite(key))
 		{
 			key = Renderer.setupCustomCharacterSprite(0x336620, 0x344d74, 0x344bb8, animationSprite, 0x00)
 		}
 	}
-
-	if (char.state == char.state.TRANSFORMING)
-	{
-		if (Ray_Transform_Fall)
-			SuperFall = true
-		else
-			Should_fall_anim = true
-	}
-
-	if (Ray_Twirl_Fall != 1 && (char.state == 0x31 || Fall_Anim_Corkscrew) && (char.flags & char.flag.IN_AIR))
-	{
-		Should_fall_anim = true
-	}
-
-	if (Ray_Twirl_Fall == 1 && (char.state.former == char.state.STRAIGHTJUMP && char.state == char.state.RUNNING) || (Ray_Uncurled_Fall == 1 && char.state.former == char.state.STRAIGHTJUMP && char.state == char.state.RUNNING))
-		FreeFall = 1
-
-	bool chars_run = (char.state == char.state.RUNNING && Ray_Uncurled_Fall == 1 && (char.animation.sprite < 0x31))
-	bool chars_run_alt = (char.state == char.state.RUNNING && (char.animation.sprite < 0x31))
-	bool After_Transforming = (Ray_Transform_Fall && (char.state == char.state.RUNNING) && char.velocity.y >= 0 && SuperFall)
-	bool After_A_Spring_Twirl = (chars_run_alt && Ray_Twirl_Fall == 1 && (FreeFall == 1 || Fall_Anim_Corkscrew) && char.velocity.y >= 0)
-	bool Level_Transitions = (Ray_Level_Transition_Fall == 1 && FreeFall == 1 && !Should_fall_anim)
-	bool chars_states = (char.state == char.state.STANDING || char.state == char.state.LOOKING_UP || char.state == char.state.COWERING)
-	bool While_Uncurled = (Ray_Uncurled_Fall == 1 && !Should_fall_anim && ((chars_run || chars_states || char.state == char.state.FALLING_PANIC) && (char.flags & char.flag.IN_AIR) && (FreeFall || char.velocity.y >= 282) && char.protection_flag == 0 && !eggmobile_LBZ2 && char.spindash != 0x80))
-	bool End_of_Level_Falling_Fix = (Ray_Level_Transition_Fall == 1 && Force_Fall)
 
 	if (char.state == 0x31)
 	{
@@ -845,7 +815,7 @@ function bool RayCustomRendering(u8 character, u8 variant, s16 px, s16 py, bool 
 		}
 		if (char.velocity.y >= 0)
 		{
-			FreeFall = 1
+			// FreeFall = 1
 			char.state = char.state.RUNNING
 			char.animation.frame = 0
 		}
@@ -861,20 +831,8 @@ function bool RayCustomRendering(u8 character, u8 variant, s16 px, s16 py, bool 
 			char.animation.timer = ((Ray_Sprite_type == 0) ? 2 : 6)
 		}
 	}
-	
-	if (tails.carrying == 1 || char.state == char.state.HANGING || ((char.control_flags & 0x01) && !Ray_ShowFall) || char.state == char.state.DIED || (char.flags & char.flag.ON_OBJECT) || char.rotation.x != 0 || char.base_state == 0x04 || char.base_state == 0x06 || (char.state >= 0x20 && char.state <= 0x28))
-	{
-		SuperFall = false
-		FreeFall = 0
-	}
-	else if ( (char.state != char.state.ROLLING && (After_Transforming || After_A_Spring_Twirl || Level_Transitions || While_Uncurled)) || End_of_Level_Falling_Fix)
-	{
-		if (While_Uncurled)
-			TurnOffRayTail = true
-		key = (Ray_Sprite_type == 0) ? "Falling_Mania" : "Falling"
-	}
 
-	if (Ray_Sprite_type == 0)
+	if (!Ray_Sprite_type)
 	{
 		if ((animationSprite >= 0xc3) && (animationSprite <= 0xc4)) // looking up
 		{

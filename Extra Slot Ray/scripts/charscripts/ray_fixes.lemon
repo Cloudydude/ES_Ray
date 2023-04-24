@@ -9,17 +9,20 @@ function void Character.Initialization.shared(u8 character)
 	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 	{
 		MGZ2Fix = false
-		TurnOffRayTail = false
-		fix_for_LRZ = false
-		Ray_ShowFall = false
-		Force_Fall = false
-		Should_fall_anim = false
-		SuperFall = false
 
-		if (Ray_Level_Transition_Fall == 1 && (global.zone_act != 0x0100) && (global.zone_act != 0x0200) && (global.zone_act != 0x0900) && (global.zone_act != 0x1600))
-		{
-			FreeFall = false
-		}
+		//TurnOffRayTail = false
+
+		fix_for_LRZ = false
+
+		// Ray_ShowFall = false
+		// Force_Fall = false
+		// Should_fall_anim = false
+		// SuperFall = false
+
+		// if (Ray_Level_Transition_Fall == 1 && (global.zone_act != 0x0100) && (global.zone_act != 0x0200) && (global.zone_act != 0x0900) && (global.zone_act != 0x1600))
+		// {
+		// 	FreeFall = false
+		// }
 
 		flapframes = 0
 		Ray.Boosts = false
@@ -1136,32 +1139,18 @@ function bool Character.performSuperTransformation()
 	super.active.tails = 1
 	char.state = char.state.TRANSFORMING
 
-	if (Mods.isModActive("Characters Go Super Then Hyper"))
+	if (possibleSuperForm == 2)
 	{
-		if (possibleSuperForm == 2)
-		{
-			// the flicky army of death are on their union break
+		// the flicky army of death are on their union break
 
-		#if STANDALONE
-			super.active.tails = 0xff
-		#endif
-		}
-		else
-		{
-			super.active.tails = 1
-			u32[0xffffcbc0] = 0x019156
-		}
+	#if STANDALONE
+		super.active.tails = 0xff
+	#endif
 	}
 	else
 	{
-		if (possibleSuperForm == 2)
-		{
-			// the flicky army of death are on their union break
-
-		#if STANDALONE
-			super.active.tails = 0xff
-		#endif
-		}
+		// super.active.tails = 1
+		u32[0xffffcbc0] = 0x019156		// Super Sonic stars
 	}
 
 #if STANDALONE
@@ -1227,6 +1216,78 @@ function bool Character.performSuperTransformation()
 	}
 #endif
 	return true
+}
+
+// Give Super Ray super stars
+//# address-hook(0x0191a4) end(0x019230)
+function void fn0191a4()
+{
+
+	if (!isMainCharacter(CHARACTER_TAILS) || global.xtrachar != 2)
+	{
+		base.fn0191a4()
+		return
+	}
+
+	if (!super.active.tails || super.active.tails == 0xff)
+	{
+		UnloadObject()
+		return
+	}
+
+#if STANDALONE
+	// Ray charging a Super Peel-Out right now?
+	if (u8[0xffffb000 + 0x3d] == 0x80)
+	{
+		objA0.position.x.u16 += (s16[0xffffb000 + 0x1c] >> 10) * ((u8[0xffffb000 + 0x2a] & char.flag.FACING_LEFT) ? 1 : -1)
+	}
+#endif
+
+	if (objA0.state != 0)
+	{
+		SuperSonicStars.CreateSparks()
+	}
+
+	if (u8[A0 + 0x34] != 0)
+	{
+		--objA0.animation.timer
+		if (s8(objA0.animation.timer) < 0)
+		{
+			objA0.animation.timer = 1
+			++objA0.animation.sprite
+			if (objA0.animation.sprite >= 6)
+			{
+				objA0.animation.sprite = 0
+				u8[A0 + 0x34] = 0
+				u8[A0 + 0x35] = 1
+				return
+			}
+		}
+
+		if (u8[A0 + 0x35] == 0)
+		{
+			objA0.position.x.u16 = u16[0xffffb000 + 0x10]
+			objA0.position.y.u16 = u16[0xffffb000 + 0x14]
+		}
+		DrawObject()
+	}
+	else
+	{
+		if (u8[0xffffb000 + 0x2e] == 0 && abs(s16[0xffffb000 + 0x1c]) >= 0x0800)
+		{
+			objA0.animation.sprite = 0
+			u8[A0 + 0x34] = 0x01
+
+			objA0.position.x.u16 = u16[0xffffb000 + 0x10]
+			objA0.position.y.u16 = u16[0xffffb000 + 0x14]
+			DrawObject()
+		}
+		else
+		{
+			u8[A0 + 0x34] = 0
+			u8[A0 + 0x35] = 0
+		}
+	}
 }
 
 
@@ -1315,9 +1376,9 @@ function void Character.LandingOnGround()
 		return
 	}
 
-	TurnOffRayTail = false
+	// TurnOffRayTail = false
 
-	Fall_Anim_Corkscrew = 0
+	// Fall_Anim_Corkscrew = 0
 
 	if ((super.active.tails & 0x80) && char.state == char.state.BALANCING2 && (char.velocity.x > 1500 || char.velocity.x < -1500))
 	{
@@ -2039,13 +2100,17 @@ function void fn05ca9e()
 // Give Ray a Super and Hyper form
 function u32 Game.getSetting(u32 settingId)
 {
-	if (global.xtrachar == 2 && settingId == SETTING_HYPER_TAILS)
-		return 1
-
+	if (global.xtrachar == 2)
+	{
+		if (settingId == SETTING_HYPER_TAILS)
+			return 1
+		else if (settingId == SETTING_SUPER_PEELOUT)
+			return 0
+	}
 	return base.Game.getSetting(settingId)
 }
 
-#if GAMEAPP <= 0x22051500
+#if GAMEAPP <= 0x23032500
 // Fix for LBZ act 1 where the snow particles don't appear at the start
 //# address-hook(0x039ad2) end(0x039b64)
 function void fn039ad2()

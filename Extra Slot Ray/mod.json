@@ -5,7 +5,7 @@
 		"Author": "Fabchaotix, Edition, campbellsonic, iCloudius",
 		"Description": "Play as Ray in Sonic 3 A.I.R without taking up another character's slot. He can glide like cape Mario and be used as a hang glider when used as a partner.",
 		"URL": "",
-		"ModVersion": "v2.051",
+		"ModVersion": "v2.1",
 		"GameVersion": "v22.05.15.0"
 	},
 	"Settings":
@@ -142,54 +142,6 @@
 				{
 					"0": "Default",
 					"1": "Mania"
-				}
-			},
-			{
-				"InternalName": "Spring Fall",
-				"DisplayName": "Bouncing off a Spring",
-				"Variable": "Ray_Twirl_Fall",
-				"DefaultValue": "0",
-				"Category": "Falling animation",		
-				"Options":
-				{
-					"0": "Off",
-					"1": "On"
-				}
-			},
-			{
-				"InternalName": "Transform Fall",
-				"DisplayName": "After Transforming",
-				"Variable": "Ray_Transform_Fall",
-				"DefaultValue": "1",	
-				"Category": "Falling animation",	
-				"Options":
-				{
-					"0": "Off",
-					"1": "On"
-				}
-			},
-			{
-				"InternalName": "From AIZ to that one zone",
-				"DisplayName": "Level Transitions",
-				"Variable": "Ray_Level_Transition_Fall",
-				"DefaultValue": "0",
-				"Category": "Falling animation",		
-				"Options":
-				{
-					"0": "Off",
-					"1": "On"
-				}
-			},
-			{
-				"InternalName": "Uncurl",
-				"DisplayName": "While Uncurled",
-				"Variable": "Ray_Uncurled_Fall",
-				"DefaultValue": "0",
-				"Category": "Falling animation",		
-				"Options":
-				{
-					"0": "Off",
-					"1": "On"
 				}
 			},
 			{
