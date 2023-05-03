@@ -957,6 +957,9 @@ function bool RayCustomRendering(u8 character, u8 variant, s16 px, s16 py, bool 
 			A1 = 0xffffe500 + u8(posbackup.offset.player1 - (i * 8 + 4))
 			s16 px0 = u16[A1] - camera.foreground.x.u16 + (i * afterImagesOffsetX / 4)
 			s16 py0 = u16[A1+2] - camera.foreground.y.u16
+			if (level.vertical_wrap == 0xff00)	// Consider vertical level wrap
+				py0 &= level.height.bitmask
+
 			Renderer.drawCustomSprite(key, px0, py0, atex, flags, renderQueue - i, angle, 192 - i * 32)
 		}
 	}

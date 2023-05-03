@@ -1,6 +1,6 @@
 function void initializeMainGame()
 {
-	if (global.xtrachar != 2)
+	if (global.xtrachar != 2 || global.zone_act != 0x0000)
 	{
 		base.initializeMainGame()
 		return

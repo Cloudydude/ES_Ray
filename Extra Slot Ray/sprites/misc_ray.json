@@ -60,7 +60,7 @@
 	"Ray_Super_text":  { "File": "Others.bmp", "Rect": "0,51,74,16", "Center": "0,0" },
 	"Ray_Hyper_text":  { "File": "Others.bmp", "Rect": "0,71,74,16", "Center": "0,0" },
 
-	"Result_NamePlate_Ray":  { "File": "Custom_hud_Ray.png", "Rect": "402,111,134,20", "Center": "83,8" },
+	"Result_NamePlate_Ray":  { "File": "Custom_hud_Ray.png", "Rect": "402,111,134,20", "Center": "59,0" },
 
 	"hud_text_score_mania":  { "File": "Custom_hud_Ray.png", "Rect": "176,48,41,14", "Center": "1,0" },
 	"hud_text_time_mania":  { "File": "Custom_hud_Ray.png", "Rect": "176,64,33,14", "Center": "1,0" },
@@ -102,9 +102,9 @@
 	"hud_text_bonus_mania":  { "File": "Custom_hud_Ray.png", "Rect": "176,96,43,14", "Center": "1,0" },
 	"hud_text_ring_mania":  { "File": "Custom_hud_Ray.png", "Rect": "224,48,33,14", "Center": "1,0" },
 
-	"Ray_Mania_Plate":  { "File": "Custom_hud_Ray.png", "Rect": "224,96,45,18", "Center": "1,0" },
-	"Super_Mania_Plate":  { "File": "Custom_hud_Ray.png", "Rect": "176,126,74,18"},
-	"Hyper_Mania_Plate":  { "File": "Custom_hud_Ray.png", "Rect": "251,126,74,18"},
+	"Ray_Mania_Plate":  { "File": "Custom_hud_Ray.png", "Rect": "224,96,48,18", "Center": "-3,1" },
+	"Super_Mania_Plate":  { "File": "Custom_hud_Ray.png", "Rect": "176,126,74,18", "Center": "0,1" },
+	"Hyper_Mania_Plate":  { "File": "Custom_hud_Ray.png", "Rect": "251,126,74,18", "Center": "0,1" },
 	"hud_lives_icon_rayMania":  { "File": "Custom_hud_Ray.png", "Rect": "178,146,30,19", "Center": "1,1" },
 	"monitor_mania_Ray_shoe_red":  { "File": "Custom_hud_Ray.png", "Rect": "160,16,16,16", "Center": "8,8" },
 	"monitor_mania_Ray_shoe":  { "File": "Custom_hud_Ray.png", "Rect": "176,16,16,16", "Center": "8,8" },

@@ -127,3 +127,16 @@ function void fn04df86()
 		fn04dffe()
 	}
 }
+
+// Blue Spheres results screen
+//# address-hook(0x02ec80) end(0x02eca6)
+function void fn02ec80()
+{
+	if (global.xtrachar == 2)
+	{
+		D0 = 0x0C
+		D1 = 1
+		return
+	}
+	base.fn02ec80()
+}

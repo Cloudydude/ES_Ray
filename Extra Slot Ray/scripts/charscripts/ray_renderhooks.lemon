@@ -4,29 +4,23 @@ global bool Ray_Zone_Banner
 global bool Custom_Banner
 global bool Ray_hud_type
 
-function bool ESS_drawchar_Es(s16 px, s16 py, bool no_save, u8 ES_val)
+function bool ESS_drawChar_Es(s16 px, s16 py, bool no_save, u8 ES_val)
 {
 	if (ES_val == 0x02)
 	{
-		s16 posx = no_save ? px + 0x2f : px + 0x2f
-		if (System.getGlobalVariableValueByName("Mighty_Partner") == 0x01)
-			posx -= 0x03
-		s16 posy = no_save ? py + 0x3f : py + 0x89
-		objA0.animation.timer = ES_val
-		
-		ExtraChar.DataSelect.drawCharacterSprite(posx, posy, 0x9fff)
+		ExtraChar.DataSelect.drawCharacterSprite(px, py, 0x5FFF)
 		return true
 	}
 	
-	return base.ESS_drawchar_Es(px, py, no_save, ES_val)
+	return base.ESS_drawChar_Es(px, py, no_save, ES_val)
 }
 
-function s32 ESS_saveboxgetcolor_Es(u8 ES_val)
+function s32 ESS_saveBoxGetColor_Es(u8 ES_val)
 {
 	if (ES_val == 0x02)
 		return 0xfc486c
 	
-	return base.ESS_saveboxgetcolor_Es(ES_val)
+	return base.ESS_saveBoxGetColor_Es(ES_val)
 }
 
 function string ExtraChar.Menu.actselect.items.menuitems.getNames(u8 character)
@@ -105,7 +99,7 @@ function void ExtraChar.DataSelect.drawCharacterSprite(s16 px, s16 py, u16 rende
 	string key
 
 #if EXTRA_SAVE_SLOTS_ACTIVE
-	if (Mods.isModActive("Extra Slot Mighty") && System.getGlobalVariableValueByName("Mighty_Partner") == 1 && (objA0.animation.timer == 1 || u8[A3 + 0x24] == 0x01))
+	if (Mods.isModActive("Extra Slot Mighty") && System.getGlobalVariableValueByName("Mighty_Partner") == 1 && u8[A3 + 0x24] == 0x01)
 #else
 	if (Mods.isModActive("Extra Slot Mighty") && System.getGlobalVariableValueByName("Mighty_Partner") == 1 && objA0.animation.timer == 1)
 #endif
@@ -117,7 +111,7 @@ function void ExtraChar.DataSelect.drawCharacterSprite(s16 px, s16 py, u16 rende
 	}
 
 #if EXTRA_SAVE_SLOTS_ACTIVE
-	if (objA0.animation.timer == 0x02 || u8[A3 + 0x24] == 0x02)
+	if (u8[A3 + 0x24] == 0x02)
 #else
 	if (objA0.animation.timer == 0x02)
 #endif
@@ -126,7 +120,7 @@ function void ExtraChar.DataSelect.drawCharacterSprite(s16 px, s16 py, u16 rende
 		key = Ray_menu_sprites()
 
 		if (Renderer.hasCustomSprite(key))
-			Renderer.drawCustomSprite(key, px, py, atex, 0, renderQueue)
+			Renderer.drawCustomSprite(key, px, py, atex, SPRITE_FLAG_PRIO, renderQueue)
 		return
 	}
 	
@@ -216,11 +210,26 @@ function void ExtraChar.Competition.drawCharacterContinueSprite(s16 px, s16 py, 
 	base.ExtraChar.Competition.drawCharacterContinueSprite(px, py, renderQueue)
 }
 
+function u64 ESS_getCharLifeIcon(u64 name)
+{
+	if (u8[A3 + 0x24] == 0x02)
+		return (Ray_Sprite_type) ? "ESS_Life_S3Ray" : "ESS_Life_ManiaRay"
+	return base.ESS_getCharLifeIcon(name)
+}
+
+function u64 ESS_getCharContIcon(u64 name)
+{
+
+	if (u8[A3 + 0x24] == 0x02)
+		return (Ray_Sprite_type) ? "ESS_Cont_S3Ray" : "ESS_Cont_ManiaRay"
+	return base.ESS_getCharContIcon(name)
+}
+
 function void ExtraChar.Challenges.drawCharacterContinueSprite(u8 xtrachar, s16 px, s16 py, u8 flags, u16 renderQueue)
 {
 	if (xtrachar == 0x02)
 	{
-		string key = "ESS_Cont_Es2"
+		string key = (Ray_Sprite_type) ? "Ray_DA_Challenges_S3" : "Ray_DA_Challenges_M"
 		Renderer.drawCustomSprite(key, px, py, 0x00, flags, renderQueue)
 		return
 	}
@@ -601,9 +610,7 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
     
 	if (objA0.mapping_offset == 0x00ce0e || objA0.mapping_offset == 0x20bd68)
 	{
-		ExtraChar.loadCharacterPalette(0x02, 0x802080 + u32(0x01 * 0x80), 0x00)
 		u16 characters = u16[A0 + 0x34]
-
 		if (objA0.update_address == 0x00d30c)
 			characters = u16[0xffffef4c]
 		else if (objA0.update_address != 0x00d42c)
@@ -718,12 +725,6 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 				return true
 			}       
 		}
-		
-		if (objA0.update_address == 0x02dd98 && (objA0.animation.sprite == 0x14 || objA0.animation.sprite == 0x15))	// "Ray" results text
-		{
-			Renderer.drawCustomSprite( (Mania_Title_Cards) ? "Result_NamePlate_Ray" : ((Ray_hud_type == 1) ? "Ray_Mania_Plate" : "ray_results_text"), px + ((Mania_Title_Cards) ? 0x30 : ((Ray_hud_type == 1) ? 0x0b : 0x20)), py + ((Ray_hud_type == 1 && !Mania_Title_Cards) ? 0 : 0x8), 0, 0x40, (Mania_Title_Cards) ? renderQueue - 50 : renderQueue)
-			return true
-		}
 							// Blue Spheres results texts								// Faliure
 		if (objA0.update_address == 0x02ea50 || objA0.update_address == 0x02ec1e || objA0.update_address == 0x02eac8)
 		{
@@ -766,52 +767,23 @@ function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
 		if (gameMode == 0x48 || gameMode == 0x0c)	// Blue Spheres results + fade to main game afterwards
 		{
 			// Blue Spheres results texts
-			if (objA0.update_address == 0x02ea50 || objA0.update_address == 0x02ec1e)
+			if (objA0.update_address == 0x02ea50 || objA0.update_address == 0x02ec1e || objA0.update_address == 0x02dd98) // <-- Level results texts
 			{
 				bool isSKStage = (global.lock_on_state == 0 && global.sk_bluespheres)
 				
 				if (objA0.animation.sprite == 0x14 || objA0.animation.sprite == 0x15)	// Ray
 				{
-					bool adjustforS3stages = (!isSKStage && global.chaos_emeralds != 7)
-					bool adjustforSKstages = (isSKStage && global.super_emeralds != 7)
-
-					if (Mania_Title_Cards)
-						Renderer.drawCustomSprite("Result_NamePlate_Ray", px + 0x20, py + 0x8, 0, SPRITE_FLAG_PRIO, renderQueue - 50)
-					else if (Ray_hud_type == 1)
-					{
-						if (A0 == 0xffffbde0 || A0 == 0xffffc2ca) // Now Ray can
-							Renderer.drawCustomSprite("Ray_Mania_Plate", px + 0x0b, py, 0, SPRITE_FLAG_PRIO, renderQueue)
-						else if (A0 == 0xffffbf08 || A0 == 0xffffc3f2) // be super/hyper
-							Renderer.drawCustomSprite("Ray_Mania_Plate", px + 0x14, py, 0, SPRITE_FLAG_PRIO, renderQueue)
-						else if (A0 == 0xffffbd96) // Ray 
-							Renderer.drawCustomSprite("Ray_Mania_Plate", px + 0x07, py, 0, SPRITE_FLAG_PRIO, renderQueue)
-					}
-					else
-					{
-						u8 X_adjust = (adjustforS3stages || adjustforSKstages) ? 0x1e : 0x20
-						key = "ray_results_text"
-						if (A0 == 0xffffbde0 || A0 == 0xffffc2ca) // Now Ray can
-							Renderer.drawCustomSprite(key, px + 0x20, py + 0x8, 0, SPRITE_FLAG_PRIO, renderQueue)
-						else if (A0 == 0xffffbf08 || A0 == 0xffffc3f2) // be super/hyper
-							Renderer.drawCustomSprite(key, px + 0x29, py + 0x8, 0, SPRITE_FLAG_PRIO, renderQueue)
-						else if (A0 == 0xffffbd96) // Ray 
-							Renderer.drawCustomSprite(key, px + X_adjust, py + 0x8, 0, SPRITE_FLAG_PRIO, renderQueue)
-					}
+					Renderer.drawCustomSprite( (Mania_Title_Cards) ? "Result_NamePlate_Ray" : ((Ray_hud_type == 1) ? "Ray_Mania_Plate" : "ray_results_text"), px, py, 0, 0x40, (Mania_Title_Cards) ? renderQueue - 50 : renderQueue)
 					return true
 				}
 
 				if (objA0.animation.sprite == 0x12)
 				{
 					if (global.super_emeralds == 7) // HYPER
-					{
-						Renderer.drawCustomSprite((Mania_Title_Cards) ? "Result_NamePlate_HyperT" : ((Ray_hud_type == 1) ? "Hyper_Mania_Plate" : "Ray_Hyper_text"), px + 0x09, py, 0, SPRITE_FLAG_PRIO, renderQueue)
-						return true
-					}
+						Renderer.drawCustomSprite((Mania_Title_Cards) ? "Result_NamePlate_HyperT" : ((Ray_hud_type == 1) ? "Hyper_Mania_Plate" : "Ray_Hyper_text"), px, py, 0, SPRITE_FLAG_PRIO, renderQueue)
 					else // SUPER
-					{
-						Renderer.drawCustomSprite((Mania_Title_Cards) ? "Result_NamePlate_SuperT" : ((Ray_hud_type == 1) ? "Super_Mania_Plate" : "Ray_Super_text"), px + 0x09, py, 0, SPRITE_FLAG_PRIO, renderQueue)
-						return true
-					}
+						Renderer.drawCustomSprite((Mania_Title_Cards) ? "Result_NamePlate_SuperT" : ((Ray_hud_type == 1) ? "Super_Mania_Plate" : "Ray_Super_text"), px, py, 0, SPRITE_FLAG_PRIO, renderQueue)
+					return true
 				}
 
 				if (Ray_hud_type == 1)
@@ -1469,13 +1441,25 @@ function void fn05d9ee()
 function void fn05b2d4()
 {
 	if (isMainCharacter(CHARACTER_KNUCKLES))
-	{
-		u32 address = 0x802280
-		loadCharacterPalette(4, address, 0) // Ray palette
-		ShoesandGrayspalettes(address)
-	}
+		ForceLoadRaypalette()
 	base.fn05b2d4()
 }
+
+function void DataSelect.setup()
+{
+#if EXTRA_SAVE_SLOTS_ACTIVE
+	ForceLoadRaypalette()
+#endif
+	base.DataSelect.setup()
+}
+
+function void ForceLoadRaypalette()
+{
+	u32 address = 0x802280
+	loadCharacterPalette(4, address, 0) // Ray palette
+	ShoesandGrayspalettes(address)
+}
+
 
 function void ShoesandGrayspalettes(u32 address)
 {
