@@ -9,8 +9,8 @@
 	"level_select_S3C_S3_Ray":  { "File": "character_ray_misc.bmp", "Rect": "39,24,16,16"},
 	"level_select_S3C_Mania_Ray":  { "File": "character_ray_misc.bmp", "Rect": "55,24,16,16"},
 	
-	"hud_lives_icon_S3_Ray":  { "File": "Ray_monitor_icons.bmp", "Rect": "0,0,37,16" },
-	"hud_lives_icon_Mania_Ray":  { "File": "Ray_monitor_icons.bmp", "Rect": "0,20,37,16" },
+	"hud_lives_icon_S3_Ray":  { "File": "Ray_monitor_icons.bmp", "Rect": "0,0,53,16" },
+	"hud_lives_icon_Mania_Ray":  { "File": "Ray_monitor_icons.bmp", "Rect": "0,20,53,16" },
 	"hud_lives_name": { "File": "hud_ray.png", "Rect": "16,0,48,16", "Center": "-16,0" },
 
 	"hud_bonus_icon_slot2":  { "File": "Others.bmp", "Rect": "43,13,12,19", "Center": "0,0" },

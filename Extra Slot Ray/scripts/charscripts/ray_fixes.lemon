@@ -932,7 +932,7 @@ function void Character.OnCollisionWithDynamicObject()
 {
 	if (global.xtrachar == 2 || (global.characters != CHARS_TAILS_ALONE && char.character == CHARACTER_TAILS && ( (Ray_Partner == 1 && isMainCharacter(CHARACTER_SONIC) && global.xtrachar == 0) || (Ray_Partner == 2 && isMainCharacter(CHARACTER_KNUCKLES) || (Ray_Partner == 3 && global.xtrachar == 1) || Ray_Partner == 4) ) ))
 	{
-		// Example values for u8[A1 + 0x28]:
+		// Example values for objA1.collision_attributes:
 		//  - 0x06, 0x0b, 0x17, 0x1a = Different types of enemies
 		//  - 0x0f		 = Boss enemy
 		//  - 0x18		 = Extended arm of DEZ Chainspike
@@ -945,22 +945,19 @@ function void Character.OnCollisionWithDynamicObject()
 		//  - 0x98, 0x9b = Projectile
 		//  - 0xd8		 = Thrown mushroom, stars over starpost
 
-		D1.u8 = u8[A1 + 0x28] & 0xc0
+		D1.u8 = (objA1.collision_attributes & collision_attributes.flags)
 		if (D1.u8 == 0)
 		{
 			// Collision is an enemy, i.e. is harmful, but can be attacked
 			bool attacking = false
-			if (char.bonus_effect & char.bonus.INVINCIBLE)
-			{
-				attacking = true
-			}
-			else if (char.state == char.state.ROLLING || char.state == char.state.SPINDASH)
+			if (char.bonus_effect & char.bonus.INVINCIBLE || char.state == char.state.ROLLING || char.state == char.state.SPINDASH)
 			{
 				attacking = true
 			}
 		#if STANDALONE
 			else if (Game.getSetting(SETTING_DROPDASH) && char.character == CHARACTER_SONIC && char.state == char.state.SONIC_DROPDASH)
 			{
+				// Count Sonic's drop dash as a rolling state
 				attacking = true
 			}
 		#endif
@@ -971,6 +968,11 @@ function void Character.OnCollisionWithDynamicObject()
 				if (char.character == CHARACTER_KNUCKLES)	// only time it isn't is as Knuckles
 				{
 					isThreat = (char.double_jump_state != 1 && char.double_jump_state != 3)
+				}
+				else if (char.character == CHARACTER_SONIC || char.double_jump_state == 0 || (char.flags & char.flag.UNDERWATER))
+				{
+					// No real special conditions for Sonic besides the drop dash
+					isThreat = true
 				}
 
 				if (isThreat)
@@ -992,6 +994,23 @@ function void Character.OnCollisionWithDynamicObject()
 				if (u8[A1 + 0x29] == 0)
 				{
 					u8[A1 + 0x2a] |= 0x80
+				}
+
+				if (char.character == CHARACTER_KNUCKLES)
+				{
+					if (char.double_jump_state == 1)
+					{
+						char.double_jump_state = 2
+						char.state = char.state.KNUX_FALLING
+
+						if (char.velocity.x >= 0)
+							char.flags |= char.flag.FACING_LEFT
+						else
+							char.flags &= ~char.flag.FACING_LEFT
+
+						char.hitbox_extends.x = char.hitbox.default.x
+						char.hitbox_extends.y = char.hitbox.default.y
+					}
 				}
 			}
 			else
@@ -1023,11 +1042,11 @@ function void Character.OnCollisionWithDynamicObject()
 				}
 			}
 		}
-		else if (D1.u8 == 0x40)
+		else if (D1.u8 == collision.flag.ITEM)
 		{
 			base.Character.OnCollisionWithDynamicObject()
 		}
-		else if (D1.u8 == 0x80)
+		else if (D1.u8 == collision.flag.THREAT)
 		{
 			// Harmful object
 			Character.OnThreatCollision()
