@@ -3,9 +3,10 @@
 	{
 		"Name": "Extra Slot Ray",
 		"Author": "Fabchaotix, Edition, campbellsonic, iCloudius",
+		"UniqueID": "extra-slot-project-ray",
 		"Description": "Play as Ray in Sonic 3 A.I.R without taking up another character's slot. He can glide like cape Mario and be used as a hang glider when used as a partner.",
 		"URL": "",
-		"ModVersion": "v2.11",
+		"ModVersion": "v2.12",
 		"GameVersion": "v22.05.15.0"
 	},
 	"Settings":

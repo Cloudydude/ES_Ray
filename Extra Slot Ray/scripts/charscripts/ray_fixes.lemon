@@ -1169,7 +1169,7 @@ function bool Character.performSuperTransformation()
 	else
 	{
 		// super.active.tails = 1
-		u32[0xffffcbc0] = 0x019156		// Super Sonic stars
+		u32[0xffffcbc0] = 0x019156		// Super Sonic star trail for Ray
 	}
 
 #if STANDALONE
@@ -1255,7 +1255,7 @@ function void fn0191a4()
 	}
 
 #if STANDALONE
-	// Ray charging a Super Peel-Out right now?
+	// Is Ray charging a Super Peel-Out right now?
 	if (u8[0xffffb000 + 0x3d] == 0x80)
 	{
 		objA0.position.x.u16 += (s16[0xffffb000 + 0x1c] >> 10) * ((u8[0xffffb000 + 0x2a] & char.flag.FACING_LEFT) ? 1 : -1)
@@ -1456,7 +1456,6 @@ function void Character.LandingOnGroundResetState()
 		base.Character.LandingOnGroundResetState()
 		return
 	}
-	// base.Character.LandingOnGroundResetState()
 }
 
 
